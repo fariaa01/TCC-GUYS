@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão de Funcionários</title>
+  <link rel="stylesheet" href="/funcionario/funcionario.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Gestão de Funcionários</h2>
+
+    <div class="search-add-bar">
+      <div class="search-bar">
+    <i class="fas fa-search search-icon"></i>
+    <input 
+      type="text" 
+      id="searchInput"
+      placeholder="Buscar por nome, cargo, email ou CPF..." 
+      value="<%= search %>"
+    />
+  </div>
+  <button class="btn-add" id="btnNovoFuncionario">
+    <i class="fas fa-user-plus"></i> Adicionar Funcionário
+  </button>
+</div>
+
+
+    <table>
+      <thead>
+        <tr>
+          <th>Foto</th>
+          <th>Nome</th>
+          <th>CPF</th>
+          <th>Função</th>
+          <th>Telefone</th>
+          <th>Email</th>
+          <th>Salário</th>
+          <th>Data de Admissão</th>
+          <th>Estado</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% funcionarios.forEach(f => { %>
+          <tr>
+            <td data-label="Foto">
+  <% if (f.foto) { %>
+    <img src="/uploads/<%= f.foto %>" alt="Foto" width="40" height="40" style="border-radius: 50%; object-fit: cover;">
+  <% } else { %>
+    <span>Sem foto</span>
+  <% } %>
+</td>
+            <td data-label="Nome"><%= f.nome %></td>
+            <td data-label="CPF"><%= f.cpf %></td>
+            <td data-label="Função"><%= f.cargo %></td>
+            <td data-label="Telefone"><%= f.telefone %></td>
+            <td data-label="Email"><%= f.email %></td>
+            <td data-label="Salário">R$ <%= parseFloat(f.salario || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
+            <td data-label="Admissão"><%= new Date(f.data_admissao).toLocaleDateString('pt-BR') %></td>
+            <td data-label="Estado"><%= f.estado %></td>
+            <td data-label="Ações">
+              <button class="btn-historico" 
+                      data-id="<%= f.id %>"
+                      data-nome="<%= f.nome %>"
+                      title="Histórico Salarial">
+                <i class="fas fa-history"></i>
+              </button>
+              <button class="btn-editar" 
+                      data-id="<%= f.id %>"
+                      data-nome="<%= f.nome %>"
+                      data-cargo="<%= f.cargo %>"
+                      data-email="<%= f.email %>"
+                      data-data_admissao="<%= f.data_admissao %>"
+                      data-salario="<%= f.salario %>"
+                      data-cpf="<%= f.cpf %>"
+                      data-telefone="<%= f.telefone %>"
+                      data-estado="<%= f.estado %>">
+                <i class="fas fa-edit"></i>
+              </button>
+              <a href="/funcionario/delete/<%= f.id %>" class="btn-excluir" onclick="confirmarExclusao('<%= f.id %>')">
+                <i class="fas fa-trash-alt"></i>
+              </a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <% if (pagination && pagination.totalPages > 1) { %>
+      <div class="pagination-container">
+        <div class="pagination-info">
+          Mostrando <%= ((pagination.currentPage - 1) * pagination.limit) + 1 %> a 
+          <%= Math.min(pagination.currentPage * pagination.limit, pagination.totalRecords) %> 
+          de <%= pagination.totalRecords %> funcionários
+        </div>
+        
+        <div class="pagination-controls">
+          <% if (pagination.hasPrev) { %>
+            <a href="?page=<%= pagination.currentPage - 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>" class="pagination-btn">
+              <i class="fas fa-chevron-left"></i> Anterior
+            </a>
+          <% } %>
+          
+          <div class="pagination-pages">
+            <% 
+              const startPage = Math.max(1, pagination.currentPage - 2);
+              const endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
+            %>
+            
+            <% if (startPage > 1) { %>
+              <a href="?page=1<%= search ? '&search=' + encodeURIComponent(search) : '' %>" class="pagination-page">1</a>
+              <% if (startPage > 2) { %>
+                <span class="pagination-dots">...</span>
+              <% } %>
+            <% } %>
+            
+            <% for (let i = startPage; i <= endPage; i++) { %>
+              <% if (i === pagination.currentPage) { %>
+                <span class="pagination-page active"><%= i %></span>
+              <% } else { %>
+                <a href="?page=<%= i %><%= search ? '&search=' + encodeURIComponent(search) : '' %>" class="pagination-page"><%= i %></a>
+              <% } %>
+            <% } %>
+            
+            <% if (endPage < pagination.totalPages) { %>
+              <% if (endPage < pagination.totalPages - 1) { %>
+                <span class="pagination-dots">...</span>
+              <% } %>
+              <a href="?page=<%= pagination.totalPages %><%= search ? '&search=' + encodeURIComponent(search) : '' %>" class="pagination-page"><%= pagination.totalPages %></a>
+            <% } %>
+          </div>
+          
+          <% if (pagination.hasNext) { %>
+            <a href="?page=<%= pagination.currentPage + 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>" class="pagination-btn">
+              Próxima <i class="fas fa-chevron-right"></i>
+            </a>
+          <% } %>
+        </div>
+        
+        <div class="pagination-options">
+          <label for="itemsPerPage">Itens por página:</label>
+          <select id="itemsPerPage" onchange="changeItemsPerPage(this.value)">
+            <option value="5" <%= pagination.limit === 5 ? 'selected' : '' %>>5</option>
+            <option value="10" <%= pagination.limit === 10 ? 'selected' : '' %>>10</option>
+            <option value="15" <%= pagination.limit === 15 ? 'selected' : '' %>>15</option>
+            <option value="20" <%= pagination.limit === 20 ? 'selected' : '' %>>20</option>
+          </select>
+        </div>
+      </div>
+    <% } %>
+
+    <a href="/dashboard" class="btn-voltar">⬅ Voltar</a>
+  </div>
+
+  <div id="modalFuncionario" class="modal">
+    <div class="modal-content">
+      <span id="fecharModal" class="close">&times;</span>
+      <h3>Novo Funcionário</h3>
+      <form method="POST" action="/funcionarios/create" class="form-box" enctype="multipart/form-data">
+        <input type="text" name="nome" placeholder="Nome" required />
+        <input type="text" name="cargo" placeholder="Cargo" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="date" id="dataAdmissao" name="data_admissao">
+        <input type="text" name="salario" placeholder="Ex: 1600 ou 1600.50" required />
+        <input type="text" name="cpf" id="cpf" placeholder="CPF" required />
+        <input type="text" name="telefone" id="telefone" placeholder="Telefone" required />
+        <select name="estado" required>
+          <option value="Contratado" selected>Contratado</option>
+          <option value="Demitido">Demitido</option>
+        </select>
+        <input type="file" name="foto" accept="image/*" />
+        <button type="submit">Cadastrar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalEditarFuncionario" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Editar Funcionário</h3>
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="id" id="editarId" />
+        <input type="text" name="nome" id="editarNome" placeholder="Nome" required />
+        <input type="text" name="cargo" id="editarCargo" placeholder="Cargo" required />
+        <input type="email" name="email" id="editarEmail" placeholder="Email" required />
+        <input type="date" name="data_admissao" id="editarDataAdmissao" required />
+        <input type="text" name="salario" id="editarSalario" placeholder="Ex: 1600 ou 1600.50" required />
+        <input type="text" name="cpf" id="editarCpf" placeholder="CPF" required />
+        <input type="text" name="telefone" id="editarTelefone" placeholder="Telefone" required />
+        <select name="estado" id="editarEstado" required>
+          <option value="Contratado">Contratado</option>
+          <option value="Demitido">Demitido</option>
+        </select>
+        <input type="file" name="foto" accept="image/*" />
+        <button type="submit">Salvar Alterações</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalHistoricoSalarial" class="modal">
+    <div class="modal-content modal-historico">
+      <span class="close" id="fecharModalHistorico">&times;</span>
+      <h3 id="tituloHistorico">Histórico Salarial</h3>
+      
+      <div class="historico-header">
+        <button class="btn-add-reajuste" id="btnNovoReajuste">
+          <i class="fas fa-plus"></i> Adicionar Reajuste
+        </button>
+      </div>
+      
+      <div class="historico-container">
+        <div id="historicoContent">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalNovoReajuste" class="modal">
+    <div class="modal-content">
+      <span class="close" id="fecharModalReajuste">&times;</span>
+      <h3>Novo Reajuste Salarial</h3>
+      <form id="formNovoReajuste" method="POST" action="/funcionarios/reajuste" class="form-box">
+        <input type="hidden" name="funcionario_id" id="funcionarioIdReajuste" />
+        <input type="hidden" name="usuario_responsavel" value="<%= locals.user ? locals.user.nome || 'Administrador' : 'Sistema' %>" />
+        
+        <label for="tipoReajuste">Tipo de Reajuste:</label>
+        <select name="tipo" id="tipoReajuste" required>
+          <option value="">Selecione o tipo</option>
+          <option value="Aumento">Aumento Salarial</option>
+          <option value="Promoção">Promoção</option>
+          <option value="Reajuste">Reajuste por Inflação</option>
+          <option value="Bônus">Bônus/Gratificação</option>
+        </select>
+        
+        <label for="salarioAnterior">Salário Anterior:</label>
+        <input type="text" name="salario_anterior" id="salarioAnterior" placeholder="Salário anterior" readonly />
+        
+        <label for="salarioNovo" id="labelSalarioNovo">Novo Salário:</label>
+        <input type="text" name="salario_novo" id="salarioNovo" placeholder="Ex: 1800 ou 1800.50" required />
+        
+        <div id="duracaoBonusContainer" style="display: none;">
+          <label for="duracaoBonus">Duração do Bônus (meses):</label>
+          <select name="duracao_meses" id="duracaoBonus">
+            <option value="">Selecione a duração</option>
+            <option value="1">1 mês</option>
+            <option value="2">2 meses</option>
+            <option value="3">3 meses</option>
+            <option value="6">6 meses</option>
+            <option value="12">1 ano</option>
+            <option value="24">2 anos</option>
+          </select>
+        </div>
+        
+        <label for="cargoAnterior">Cargo Anterior:</label>
+        <input type="text" name="cargo_anterior" id="cargoAnterior" placeholder="Cargo anterior" readonly />
+        
+        <label for="cargoNovo">Novo Cargo:</label>
+        <input type="text" name="cargo_novo" id="cargoNovo" placeholder="Novo cargo (se houver mudança)" />
+        
+        <label for="dataReajuste">Data do Reajuste:</label>
+        <input type="date" name="data_reajuste" id="dataReajuste" required />
+        
+        <label for="motivoReajuste">Motivo/Observações:</label>
+        <textarea name="motivo" id="motivoReajuste" placeholder="Descreva o motivo do reajuste..." rows="3"></textarea>
+        
+        <button type="submit">Registrar Reajuste</button>
+      </form>
+    </div>
+  </div>
+
+  <script nonce="<%= cspNonce %>" src="https://unpkg.com/imask"></script>
+   <script nonce="<%= cspNonce %>" src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
+  <script nonce="<%= cspNonce %>" src="/funcionario/funcionario.js"></script>
+  
+  <script nonce="<%= cspNonce %>">
+    let searchTimeout;
+    function buscarFuncionarios() {
+      const searchValue = document.getElementById('searchInput').value.trim();
+      const currentUrl = new URL(window.location);
+      
+      if (searchValue) {
+        currentUrl.searchParams.set('search', searchValue);
+      } else {
+        currentUrl.searchParams.delete('search');
+      }
+      
+      currentUrl.searchParams.set('page', '1');
+      
+      window.location.href = currentUrl.toString();
+    }
+    
+    function limparBusca() {
+      const currentUrl = new URL(window.location);
+      currentUrl.searchParams.delete('search');
+      currentUrl.searchParams.set('page', '1');
+      window.location.href = currentUrl.toString();
+    }
+
+    function changeItemsPerPage(limit) {
+      const currentUrl = new URL(window.location);
+      currentUrl.searchParams.set('limit', limit);
+      currentUrl.searchParams.set('page', '1'); 
+      window.location.href = currentUrl.toString();
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('searchInput');
+      
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          clearTimeout(searchTimeout);
+          
+          searchTimeout = setTimeout(function() {
+            buscarFuncionarios();
+          }, 800);
+        });
+
+        searchInput.addEventListener('keypress', function(event) {
+          if (event.key === 'Enter') {
+            clearTimeout(searchTimeout);
+            buscarFuncionarios();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
+
+
