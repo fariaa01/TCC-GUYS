@@ -124,3 +124,4 @@ module.exports = {
     await db.query('DELETE FROM funcionarios WHERE id = ? AND usuario_id = ?', [id, usuarioId]);
   }
 };
+

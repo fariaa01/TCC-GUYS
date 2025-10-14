@@ -73,7 +73,6 @@ module.exports = {
     return rows;
   },
 
-  // Buscar produto por ID específico
   async getById(id) {
     const sql = `
       SELECT 

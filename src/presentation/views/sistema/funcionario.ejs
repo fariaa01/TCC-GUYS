@@ -79,9 +79,9 @@
                       data-estado="<%= f.estado %>">
                 <i class="fas fa-edit"></i>
               </button>
-              <a href="/funcionario/delete/<%= f.id %>" class="btn-excluir" onclick="confirmarExclusao('<%= f.id %>')">
+              <button class="btn-excluir" onclick="confirmarExclusao('<%= f.id %>')">
                 <i class="fas fa-trash-alt"></i>
-              </a>
+              </button>
             </td>
           </tr>
         <% }) %>
@@ -272,10 +272,11 @@
 
   <script nonce="<%= cspNonce %>" src="https://unpkg.com/imask"></script>
    <script nonce="<%= cspNonce %>" src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
-  <script nonce="<%= cspNonce %>" src="/funcionario/funcionario.js"></script>
-  
+  <script nonce="<%= cspNonce %>" src="/funcionario/js/funcionario.js"></script>
+  <script nonce="<%= cspNonce %>" src="/funcionario/js/HistoricoSalarial.js"></script>
   <script nonce="<%= cspNonce %>">
     let searchTimeout;
+    
     function buscarFuncionarios() {
       const searchValue = document.getElementById('searchInput').value.trim();
       const currentUrl = new URL(window.location);

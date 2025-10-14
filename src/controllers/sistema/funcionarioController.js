@@ -197,7 +197,6 @@ module.exports = {
       const { funcionario_id } = req.params;
       console.log(`[obterHistoricoSalarial] Buscando histórico para funcionário ID: ${funcionario_id}`);
       
-      // Verificar bônus expirados antes de buscar o histórico
       await HistoricoSalarial.processarBonusExpiradosAutomatico();
       
       const historico = await HistoricoSalarial.obterPorFuncionario(funcionario_id);

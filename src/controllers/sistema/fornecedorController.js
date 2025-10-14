@@ -34,19 +34,20 @@ module.exports = {
         return res.redirect('/login');
       }
 
-      let { nome, email, cnpj, telefone, telefone_alternativo, pessoa_responsavel } = req.body;
+      let { nome, email, cnpj, telefone, telefone_alternativo, pessoa_responsavel, categoria } = req.body;
       const nomeTrim = (nome || '').trim();
       const emailTrim = email?.trim() || null;
       const telTrim = telefone?.trim() || null;
       const telAltTrim = telefone_alternativo?.trim() || null;
       const pessoaRespTrim = pessoa_responsavel?.trim() || null;
+      const categoriaTrim = categoria?.trim() || null;
       const temTelAlt = telAltTrim && telAltTrim !== '' ? 'sim' : 'nao';
 
       if (!nomeTrim) {
         const msg = 'Nome é obrigatório.';
         return wantsJSON(req)
           ? res.status(400).json({ error: msg })
-          : res.redirect('/estoque?ok=0&msg=' + encodeURIComponent(msg));
+          : res.redirect('/dados-fornecedor?ok=0&msg=' + encodeURIComponent(msg));
       }
 
       let cnpjDigits = null;
@@ -56,7 +57,7 @@ module.exports = {
           const msg = 'CNPJ deve ter 14 dígitos (somente números).';
           return wantsJSON(req)
             ? res.status(400).json({ error: msg })
-            : res.redirect('/estoque?ok=0&msg=' + encodeURIComponent(msg));
+            : res.redirect('/dados-fornecedor?ok=0&msg=' + encodeURIComponent(msg));
         }
       }
 
@@ -67,7 +68,8 @@ module.exports = {
           cnpj: cnpjDigits,
           telefone: telTrim,
           telefone_alternativo: telAltTrim,
-          pessoa_responsavel: pessoaRespTrim
+          pessoa_responsavel: pessoaRespTrim,
+          categoria: categoriaTrim,
         },
         usuarioId
       );
@@ -75,7 +77,7 @@ module.exports = {
       const okMsg = 'Fornecedor cadastrado com sucesso!';
       return wantsJSON(req)
         ? res.status(201).json({ ok: true, message: okMsg })
-        : res.redirect('/estoque?ok=1&msg=' + encodeURIComponent(okMsg));
+        : res.redirect('/dados-fornecedor?ok=1&msg=' + encodeURIComponent(okMsg));
     } catch (err) {
       console.error('Erro ao cadastrar fornecedor:', err);
 
@@ -83,13 +85,13 @@ module.exports = {
         const msg = 'Já existe fornecedor com estes dados para o seu usuário.';
         return wantsJSON(req)
           ? res.status(409).json({ error: msg })
-          : res.redirect('/estoque?ok=0&msg=' + encodeURIComponent(msg));
+          : res.redirect('/dados-fornecedor?ok=0&msg=' + encodeURIComponent(msg));
       }
 
       const msg = 'Erro ao cadastrar fornecedor.';
       return wantsJSON(req)
         ? res.status(500).json({ error: msg })
-        : res.redirect('/estoque?ok=0&msg=' + encodeURIComponent(msg));
+        : res.redirect('/dados-fornecedor?ok=0&msg=' + encodeURIComponent(msg));
     }
   },
 
@@ -98,13 +100,12 @@ module.exports = {
       const usuarioId = req.session?.userId;
       const id = req.params.id;
       const {
-        nome, email, cnpj, telefone, telefone_alternativo, pessoa_responsavel,
+        nome, email, cnpj, telefone, telefone_alternativo, pessoa_responsavel, categoria,
         website, cep, rua, numero, complemento, bairro, cidade, estado, inscricao_estadual,
         formas_pagamento, limite_credito,
         banco, agencia, conta, tipo_conta, chave_pix, favorecido
       } = req.body;
 
-      // Calcula temTelefoneAlternativo automático
       const telAltTrim = telefone_alternativo?.trim() || null;
       const temTelefoneAlternativo = telAltTrim && telAltTrim !== '' ? 'sim' : 'nao';
 
@@ -116,6 +117,7 @@ module.exports = {
         telefone_alternativo: telAltTrim,
         pessoa_responsavel: pessoa_responsavel?.trim() || null,
         temTelefoneAlternativo,
+        categoria: categoria?.trim() || null,
         website: website?.trim() || null,
         cep: cep?.trim() || null,
         rua: rua?.trim() || null,
@@ -158,13 +160,13 @@ module.exports = {
 
       const sucesso = await Fornecedor.delete(id, usuarioId);
       if (sucesso) {
-        return res.redirect('/estoque?ok=1&msg=' + encodeURIComponent('Fornecedor excluído com sucesso.'));
+        return res.redirect('/dados-fornecedor?ok=1&msg=' + encodeURIComponent('Fornecedor excluído com sucesso.'));
       } else {
-        return res.redirect('/estoque?ok=0&msg=' + encodeURIComponent('Fornecedor não encontrado ou não pertence ao usuário.'));
+        return res.redirect('/dados-fornecedor?ok=0&msg=' + encodeURIComponent('Fornecedor não encontrado ou não pertence ao usuário.'));
       }
     } catch (err) {
       console.error('Erro ao deletar fornecedor:', err);
-      return res.redirect('/estoque?ok=0&msg=' + encodeURIComponent('Erro ao excluir fornecedor.'));
+      return res.redirect('/dados-fornecedor?ok=0&msg=' + encodeURIComponent('Erro ao excluir fornecedor.'));
     }
   }, 
 

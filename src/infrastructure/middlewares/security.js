@@ -8,7 +8,8 @@ module.exports = helmet({
 
       scriptSrc: [
         "'self'",
-        "'strict-dynamic'",
+        "'unsafe-inline'",
+        "'unsafe-eval'",
         (req, res) => `'nonce-${res.locals.cspNonce}'`,
         "https://cdn.jsdelivr.net",
         "https://cdnjs.cloudflare.com",
@@ -16,7 +17,7 @@ module.exports = helmet({
       ],
       scriptSrcElem: [
         "'self'",
-        "'strict-dynamic'",
+        "'unsafe-inline'",
         (req, res) => `'nonce-${res.locals.cspNonce}'`,
         "https://cdn.jsdelivr.net",
         "https://cdnjs.cloudflare.com",
@@ -26,7 +27,6 @@ module.exports = helmet({
       styleSrc: [
         "'self'",
         "'unsafe-inline'",
-        (req, res) => `'nonce-${res.locals.cspNonce}'`,
         "https://cdn.jsdelivr.net",
         "https://cdnjs.cloudflare.com",
         "https://fonts.googleapis.com",
@@ -35,18 +35,16 @@ module.exports = helmet({
       styleSrcElem: [
         "'self'",
         "'unsafe-inline'",
-        (req, res) => `'nonce-${res.locals.cspNonce}'`,
         "https://cdn.jsdelivr.net",
         "https://cdnjs.cloudflare.com",
         "https://fonts.googleapis.com",
         "https://unpkg.com",
-        "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='",
-        "'sha256-nmbYH9QL932nGzG6pP3juQVw3fieOoiq7lDMU409Uyk='"
       ],
       styleSrcAttr: [
-        "'unsafe-inline'",
-        "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='",
-        "'sha256-nmbYH9QL932nGzG6pP3juQVw3fieOoiq7lDMU409Uyk='"
+        "'unsafe-inline'"
+      ],
+      scriptSrcAttr: [
+        "'unsafe-inline'"
       ],
 
       fontSrc: [

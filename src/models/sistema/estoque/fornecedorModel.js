@@ -5,14 +5,14 @@ function onlyDigits(str = '') {
 }
 
 module.exports = {
-  async create({ nome, email, cnpj, telefone, telefone_alternativo, pessoa_responsavel }, usuarioId) {
+  async create({ nome, email, cnpj, telefone, telefone_alternativo, pessoa_responsavel, categoria }, usuarioId) {
     if (!usuarioId) throw new Error('usuarioId ausente em fornecedorModel.create');
 
     const cnpjDigits = cnpj ? onlyDigits(cnpj) : null;
     const sql = `
       INSERT INTO fornecedores
-        (usuario_id, nome, email, cnpj, telefone, telefone_alternativo, pessoa_responsavel, tem_telefone_alternativo, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        (usuario_id, nome, email, cnpj, telefone, telefone_alternativo, pessoa_responsavel, categoria, tem_telefone_alternativo, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     `;
     const temTelefoneAlternativo = telefone_alternativo && telefone_alternativo.trim() !== '' ? 'sim' : 'nao';
     const params = [
@@ -23,6 +23,7 @@ module.exports = {
       telefone || null,
       telefone_alternativo || null,
       pessoa_responsavel || null,
+      categoria || null,
       temTelefoneAlternativo
     ];
     const [result] = await pool.execute(sql, params);
@@ -32,7 +33,7 @@ module.exports = {
   async listarTodos(usuarioId) {
     if (!usuarioId) throw new Error('usuarioId ausente em listarTodos');
     const [rows] = await pool.query(
-      `SELECT id, nome, email, cnpj, telefone, telefone_alternativo, pessoa_responsavel, tem_telefone_alternativo
+      `SELECT id, nome, email, cnpj, telefone, telefone_alternativo, categoria, pessoa_responsavel, tem_telefone_alternativo
        FROM fornecedores
        WHERE usuario_id = ?
        ORDER BY nome ASC`,
@@ -55,7 +56,7 @@ module.exports = {
 
     const sql = `
       UPDATE fornecedores SET
-        nome = ?, email = ?, cnpj = ?, telefone = ?, telefone_alternativo = ?, pessoa_responsavel = ?,
+        nome = ?, email = ?, cnpj = ?, telefone = ?, telefone_alternativo = ?, pessoa_responsavel = ?, categoria = ?,
         website = ?, cep = ?, rua = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?,
         formas_pagamento = ?, banco = ?, agencia = ?, conta = ?, tipo_conta = ?, chave_pix = ?, favorecido = ?,
         limite_credito = ?, tem_telefone_alternativo = ?, updated_at = NOW()
@@ -68,6 +69,7 @@ module.exports = {
       data.telefone || null,
       data.telefone_alternativo || null,
       data.pessoa_responsavel || null,
+      data.categoria || null, 
       data.website || null,
       data.cep || null,
       data.rua || null,

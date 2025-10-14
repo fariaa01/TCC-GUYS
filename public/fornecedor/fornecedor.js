@@ -9,27 +9,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const telAltInputCreate = document.getElementById('telefoneAlternativoCreate');
   if(telAltInputCreate) IMask(telAltInputCreate, { mask: '(00) 00000-0000' });
 
-  const selectPessoaRespCreate = document.getElementById('temPessoaResponsavelCreate');
-  const pessoaRespInputCreate = document.getElementById('pessoaResponsavelCreate');
-
   if(selectTelAltCreate && telAltInputCreate) {
     selectTelAltCreate.addEventListener('change', function() {
       if(this.value === 'sim') {
         telAltInputCreate.style.display = 'block';
+        telAltInputCreate.style.opacity = '0';
+        setTimeout(() => {
+          telAltInputCreate.style.opacity = '1';
+        }, 50);
       } else {
-        telAltInputCreate.style.display = 'none';
-        telAltInputCreate.value = '';
-      }
-    });
-  }
-
-  if(selectPessoaRespCreate && pessoaRespInputCreate) {
-    selectPessoaRespCreate.addEventListener('change', function() {
-      if(this.value === 'sim') {
-        pessoaRespInputCreate.style.display = 'block';
-      } else {
-        pessoaRespInputCreate.style.display = 'none';
-        pessoaRespInputCreate.value = '';
+        telAltInputCreate.style.opacity = '0';
+        setTimeout(() => {
+          telAltInputCreate.style.display = 'none';
+          telAltInputCreate.value = '';
+        }, 200);
       }
     });
   }
@@ -39,22 +32,48 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnFecharCreate = document.getElementById("fecharModalFornecedor");
   const formCreate = document.getElementById("formFornecedor");
 
-  btnOpenCreate.addEventListener('click', () => {
-    formCreate.reset();
-    selectTelAltCreate.value = 'nao';
-    telAltInputCreate.style.display = 'none';
-    selectPessoaRespCreate.value = 'nao';
-    pessoaRespInputCreate.style.display = 'none';
-    modalCreate.style.display = 'flex';
+  console.log('Elementos encontrados:', {
+    modalCreate: !!modalCreate,
+    btnOpenCreate: !!btnOpenCreate,
+    btnFecharCreate: !!btnFecharCreate,
+    formCreate: !!formCreate
   });
 
-  btnFecharCreate.addEventListener('click', () => modalCreate.style.display = 'none');
-  window.addEventListener('click', e => { if(e.target === modalCreate) modalCreate.style.display = 'none'; });
+  if (btnOpenCreate) {
+    btnOpenCreate.addEventListener('click', () => {
+      console.log('Botão clicado!');
+      if (formCreate) formCreate.reset();
+      if(selectTelAltCreate) {
+        selectTelAltCreate.value = 'nao';
+      }
+      if(telAltInputCreate) {
+        telAltInputCreate.style.display = 'none';
+      }
+      if (modalCreate) {
+        modalCreate.style.display = 'flex';
+        console.log('Modal deve estar visível agora');
+      }
+    });
+  } else {
+    console.error('Botão "btnAdicionarFornecedor" não encontrado!');
+  }
 
-  formCreate.addEventListener('submit', e => {
-    modalCreate.style.display = 'none';
-    Swal.fire({ title: 'Adicionando fornecedor...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+  if (btnFecharCreate) {
+    btnFecharCreate.addEventListener('click', () => {
+      if (modalCreate) modalCreate.style.display = 'none';
+    });
+  }
+
+  window.addEventListener('click', e => { 
+    if(modalCreate && e.target === modalCreate) modalCreate.style.display = 'none'; 
   });
+
+  if (formCreate) {
+    formCreate.addEventListener('submit', e => {
+      if (modalCreate) modalCreate.style.display = 'none';
+      Swal.fire({ title: 'Adicionando fornecedor...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    });
+  }
 
   const formDelete = document.createElement('form');
   formDelete.method = 'POST';

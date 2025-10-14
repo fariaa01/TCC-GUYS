@@ -62,7 +62,7 @@ app.use('/estoque', require('../src/infrastructure/routes/sistema/estoque'));
 app.use('/restaurantes', require('../src/infrastructure/routes/vendas/restaurantes'));
 app.use('/financeiro', require('../src/infrastructure/routes/sistema/financeiro'));
 app.use('/produtos', require('../src/infrastructure/routes/sistema/produto'));
-app.use('/fornecedores', require('../src/infrastructure/routes/sistema/fornecedores'));
+app.use('/fornecedores', require('../src/infrastructure/routes/sistema/dados-fornecedor'));
 app.use('/dados-fornecedor', require('../src/infrastructure/routes/sistema/dados-fornecedor'));
 app.use('/gastos-fixos', require('../src/infrastructure/routes/sistema/gastos-fixo'));
 app.use('/pedidos', require('../src/infrastructure/routes/vendas/pedido'));

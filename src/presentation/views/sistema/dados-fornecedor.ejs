@@ -4,18 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fornecedores</title>
-  <link rel="stylesheet" href="/dada-fornecedor/dados.css">
+  <link rel="stylesheet" href="/fornecedor/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Gestão de Fornecedores</h1>  
-    <a href="/dashboard" class="btn-voltar">⬅ Voltar</a>
-  </div>
-
-  <div id="modalContainer" class="modal-container">
-    <button id="btnAdicionarFornecedor" class="btn-adicionar">+ Adicionar Fornecedor</button>
+    <h2>Gestão de Fornecedores</h2>
+    
+    <div class="search-add-bar">
+      <div class="search-bar">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Buscar fornecedores...">
+      </div>
+      <button id="btnAdicionarFornecedor" class="btn-add">
+        <i class="fas fa-plus"></i>
+        Adicionar Fornecedor
+      </button>
+    </div>
   </div>
 
   <table>
@@ -27,33 +33,39 @@
         <th>Telefone</th>
         <th>Telefone Alternativo</th>
         <th>Pessoa Responsável</th>
+        <th>Categoria</th>
         <th>Ações</th>
       </tr>
     </thead>
     <tbody>
       <% fornecedores.forEach(fornecedor => { %>
         <tr>
-          <td><%= fornecedor.nome %></td>
-          <td><%= fornecedor.email %></td>
-          <td><%= fornecedor.cnpj %></td>
-          <td><%= fornecedor.telefone %></td>
-          <td>
+          <td data-label="Nome"><%= fornecedor.nome %></td>
+          <td data-label="Email"><%= fornecedor.email %></td>
+          <td data-label="CNPJ"><%= fornecedor.cnpj %></td>
+          <td data-label="Telefone"><%= fornecedor.telefone %></td>
+          <td data-label="Telefone Alternativo">
             <% if (fornecedor.telefone_alternativo && fornecedor.telefone_alternativo.trim() !== '') { %>
               <%= fornecedor.telefone_alternativo %>
             <% } else { %>
               Sem telefone alternativo
             <% } %>
           </td>
-          <td>
+          <td data-label="Pessoa Responsável">
             <% if (fornecedor.pessoa_responsavel && fornecedor.pessoa_responsavel.trim() !== '') { %>
               <%= fornecedor.pessoa_responsavel %>
             <% } else { %>
               Nenhum responsável
             <% } %>
           </td>
-          <td>
-            <a href="/fornecedores/<%= fornecedor.id %>" class="vermais-btn">Ver +</a>
-            <button class="deletar-btn" data-id="<%= fornecedor.id %>">Deletar</button>
+          <td data-label="Categoria"><%= fornecedor.categoria %></td>
+          <td data-label="Ações">
+            <a href="/fornecedores/<%= fornecedor.id %>" class="btn-editar" title="Ver detalhes">
+              <i class="fa-solid fa-eye"></i>
+            </a>
+            <button class="btn-excluir" data-id="<%= fornecedor.id %>" title="Excluir fornecedor">
+              <i class="fas fa-trash-alt"></i>
+            </button>
           </td>
         </tr>
       <% }) %>
@@ -85,16 +97,21 @@
 
         <input type="text" id="telefoneAlternativoCreate" name="telefone_alternativo" maxlength="15" placeholder="Telefone alternativo" style="display: none; margin-top: 5px;">
 
+        <label for="categoria">Categoria:</label>
+        <input type="text" id="categoria" name="categoria" placeholder="Exemplo: Açougue, Padaria, etc.">
+
         <label for="pessoa_responsavel">Pessoa responsável:</label>
         <input type="text" id="pessoa_responsavel" name="pessoa_responsavel">
 
-        <button type="submit" class="btn-salvar">Salvar</button>
+        <button type="submit">Salvar</button>
       </form>
     </div>
   </div>
 
+  <a href="/dashboard" class="btn-voltar">⬅ Voltar</a>
+
   <script nonce="<%= cspNonce %>" src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script nonce="<%= cspNonce %>" src="https://unpkg.com/imask"></script>
-  <script nonce="<%= cspNonce %>" src="/dada-fornecedor/dados-fornecedor.js"></script>
+  <script nonce="<%= cspNonce %>" src="/fornecedor/fornecedor.js"></script>
 </body>
 </html>

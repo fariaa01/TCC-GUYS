@@ -109,179 +109,434 @@
   }
 }
 
-body{
-    background-color: rgb(255, 255, 255);
-     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+:root {
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --primary-light: #dbeafe;
+  --secondary: #64748b;
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, var(--bg-main) 0%, #f1f5f9 100%);
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Container principal mais compacto */
 .containter {
-    width: 80%;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 40px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-;  
+  max-width: 900px;
+  margin: 1.5rem auto;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-light);
+  position: relative;
+  overflow: hidden;
 }
 
+.containter::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+}
+
+/* Botões modernos estilo SaaS */
 .btn-primary {
-    background-color: #28a745;
-    color: white;
-    padding: 10px 10px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: bold;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    margin-top: 10px;
-    cursor: pointer;
+  background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  letter-spacing: 0.025em;
 }
 
-input{
-    border-radius: 5px;
-    margin-bottom: 10px;
-    border: none;
-    padding: 10px;
-    background-color: #28a74610;
-    animation: none;
-}
-fieldset {
-     width: 80%;
-     
-    margin: 0 auto;
-    margin-bottom: 20px;
-    padding: 30px;
-    background-color: #f9f9f9;
-     border: 1px solid #ebebeb;
-    border-radius: 10px;
-     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    
-
+.btn-primary:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
-.endereço{
-     width: 88%;
-     
-    margin-left: 5% ;
-    margin-bottom: 20px;
-    padding: 20px;
-  
-     border: 1px none #ebebeb;
-
-       display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    justify-content: space-between;
-    flex-wrap: wrap;
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
-.endereço input{
-    height: 32.5px;
-    width: 99%;
-}
-
-.endereço #CEP{
-    height: 32.5px;
-    width: 55%;
-}
-
-.endereço #número{
-    height: 32.5px;
-    width: 50%;
-}
-
-.endereço fieldset{
-    display: block;
-}
-
-.deladin{
-    display: grid;
-    grid-template-columns: 120px 120px 120px;
-    gap: 5px;
-}
-
-input:hover{
-    background-color: #28a7465a;
-    color: white;
-    transition: 0.3s;
-}
+/* Labels modernas */
 label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    display: block;
-}
-.historico-compras {
-    width: 88%;
-    margin-top: 20px;
-    margin-left: 5% ;
-    
-}
-select {
-    width: 100%;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    background-color: #f8f8f8;
-    margin-bottom: 10px;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  letter-spacing: 0.025em;
 }
 
-select:hover {
-    background-color: #ffffff;
-    transition: 0.3s;
-    border-color: #56f07ab7;
+/* Inputs mais compactos */
+input, select, textarea {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  font-family: inherit;
+  margin-bottom: 0.4rem;
 }
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+  transform: translateY(-1px);
+}
+
+input:hover, select:hover, textarea:hover {
+  border-color: var(--secondary);
+  background: #fafbfc;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+/* Fieldsets mais compactos */
+fieldset {
+  width: 100%;
+  margin: 0 0 1.5rem 0;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+fieldset:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+fieldset legend {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 0 1rem;
+  margin-left: -0.5rem;
+}
+
+/* Seção de endereço mais compacta */
+.endereço {
+  width: 100%;
+  margin: 0 0 1.5rem 0;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.endereço:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+/* Inputs específicos do endereço - já cobertos pela regra global */
+
+/* Grid mais compacto para inputs especiais */
+.deladin {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.8rem;
+}
+
+/* Labels e inputs já definidos nas regras globais modernas */
+/* Container da tabela de histórico */
+.historico-compras-container {
+  width: 100%;
+  margin: 2rem 0;
+}
+/* Selects já estão incluídos na regra global de inputs */
 
 .btn-voltar {
-   background-color: #007bff;
-    color: white;
-    padding: 10px 10px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: bold;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    margin-top: 10px;
-    cursor: pointer;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  letter-spacing: 0.025em;
 }
+
+.btn-voltar:hover {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #1d4ed8 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-voltar:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+/* Tabelas modernas */
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 2rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
 }
 
 th, td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+  padding: 0.8rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
 }
+
 th {
-    background-color: #f2f2f2;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--border);
 }
+
+td {
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+tbody tr {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+tbody tr:hover {
+  background: var(--primary-light);
+  transform: scale(1.002);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+/* Tipografia mais compacta */
 h2 {
-    font-size: 34px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+  position: relative;
+  padding-bottom: 0.8rem;
 }
 
-.buttons{
-   
-    margin-left: 76%;
-    margin-top: 1%;
+h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+  border-radius: 2px;
 }
 
-.corpo{
-    background-color: #f2f2f2;
+/* Container de botões moderno */
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 1rem 0;
+}
+
+@media (max-width: 768px) {
+  .buttons {
+    justify-content: center;
+    flex-direction: column;
+  }
+}
+
+/* Corpo com gradiente moderno */
+.corpo {
+  background: linear-gradient(135deg, var(--bg-main) 0%, #f1f5f9 100%);
+  min-height: 100vh;
+}
+
+/* Animações e efeitos modernos */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.containter {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+fieldset, .endereço {
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estados de loading e feedback visual */
+.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Responsividade moderna */
+@media (max-width: 1024px) {
+  .containter {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  fieldset {
+    grid-template-columns: 1fr;
+  }
+  
+  .endereço {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .containter {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+  }
+  
+  fieldset, .endereço {
+    padding: 1.5rem;
+  }
+  
+  th, td {
+    padding: 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .containter {
+    margin: 0;
+    border-radius: 0;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  fieldset, .endereço {
+    padding: 1rem;
+  }
+  
+  .deladin {
+    grid-template-columns: 1fr;
+  }
 }

@@ -86,7 +86,7 @@
   .separador {
     border: none;
     height: 3px;
-    background: linear-gradient(to right, #1abc9c, #2ecc707e);
+    background: linear-gradient(to right, #3489dd, #3489dd7e);
     margin: 40px auto;
     width: 70%;
     border-radius: 10px;
@@ -248,15 +248,15 @@
     /* === MODERN SAAS FILTER STYLES === */
     
     :root {
-      --bg: #f6f8f7;
+      --bg: #f6f8fb;
       --panel: #ffffff;
-      --text: #2b3a2f;
-      --muted: #8aa095;
-      --brand: #2fa36b;
-      --brand-700: #258b5b;
-      --brand-50: #e9f6ee;
-      --accent: #f5f8f6;
-      --border: #e7ece9;
+      --text: #2b3a3f;
+      --muted: #8aa0b5;
+      --brand: #3489dd;
+      --brand-700: #2574c7;
+      --brand-50: #e9f2fe;
+      --accent: #f5f8fb;
+      --border: #e7ecf4;
       --shadow: 0 10px 24px rgba(16, 24, 40, .06);
       --radius: 18px;
     }
@@ -372,7 +372,6 @@
       color: var(--text);
     }
 
-    /* Filter Options Cards */
     .filter-options {
       display: grid;
       grid-template-columns: 1fr 1fr;

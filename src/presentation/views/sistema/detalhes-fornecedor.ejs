@@ -184,8 +184,9 @@
         </div>
       </fieldset>
 
-      <div>
-        <label>Histórico de Compras:</label>
+      
+      <fieldset>
+        <legend>Histórico de Compras</legend>
         <table class="historico-compras">
           <thead>
             <tr>
@@ -236,11 +237,11 @@
             <% } %>
           </tbody>
         </table>
-      </div>
+      </fieldset>
 
       <button id="btnSalvarAlteracoes" type="submit" style="display:none;">Salvar Alterações</button>
     </form>
-    <a href="/fornecedores" class="btn-voltar">⬅ Voltar</a>
+    <a href="/dados-fornecedor" class="btn-voltar">⬅ Voltar</a>
   </div>
 
   <script nonce="<%= cspNonce %>" src="https://unpkg.com/imask"></script>
