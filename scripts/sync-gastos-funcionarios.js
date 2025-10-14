@@ -22,7 +22,7 @@ async function syncGastosFuncionarios() {
       const salario = funcionario.salario;
       const dataAdmissao = funcionario.data_admissao;
       
-      console.log(`\n👤 Verificando: ${nomeFuncionario} (Salário: R$ ${salario})`);
+      console.log(`\nVerificando: ${nomeFuncionario} (Salário: R$ ${salario})`);
       
       const gastosFixos = await GastosFixos.getAll(userId);
       const nomeGastoEsperado = `Salário - ${nomeFuncionario}`;
