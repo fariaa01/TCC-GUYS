@@ -1,6 +1,7 @@
 const Menu = require('../../models/vendas/menuModel');
 const Audit = require('../../models/sistema/auditModel');
 const Usuario = require('../../models/usuarios/userModel');
+const { criar } = require('../../models/sistema/funcionario/historicoSalarialModel');
 
 module.exports = {
   renderMenu: async (req, res) => {
@@ -15,28 +16,98 @@ module.exports = {
       res.status(500).send('Erro ao carregar o menu');
     }
   },
-
-  createPrato: async (req, res) => {
+  
+  criarPrato: async (req, res) => {
     try {
       const usuarioId = req.session.userId;
-      const precoNum = Number(String(req.body.preco).replace(',', '.'));
+      const { categoria, nome_prato, ingredientes, quantidade, preco, tamanhos } = req.body;
+      
+      // Validar se tem preço único OU múltiplos tamanhos
+      const temPrecoUnico = preco !== undefined && preco !== '';
+      const temTamanhos = tamanhos && Array.isArray(tamanhos) && tamanhos.length > 0;
+      
+      if (!nome_prato) {
+        return res.status(400).send('Nome do prato é obrigatório.');
+      }
+      
+      if (!temPrecoUnico && !temTamanhos) {
+        return res.status(400).send('Informe um preço único ou múltiplos tamanhos com preços.');
+      }
 
-      const dados = {
-        ...req.body,
-        preco: Number.isNaN(precoNum) ? 0 : precoNum,
-        imagem: req.file ? req.file.filename : null,
+      // Processar preço único se fornecido
+      let precoNum = null;
+      if (temPrecoUnico && !temTamanhos) {
+        precoNum = Number(String(preco).replace(',', '.'));
+        if (Number.isNaN(precoNum) || precoNum < 0) {
+          return res.status(400).send('Preço inválido.');
+        }
+      }
+
+      const dadosPrato = {
+        categoria,
+        nome_prato,
+        ingredientes,
+        quantidade: quantidade || null,
+        preco: temTamanhos ? null : precoNum, // Se tem tamanhos, preço = null
         usuario_id: usuarioId,
         destaque: req.body.destaque ? 1 : 0,
-        is_disponivel: 1,
-        arquivado: 0,
+        is_disponivel: req.body.is_disponivel ? 1 : 0,
+        arquivado: req.body.arquivado ? 1 : 0,
         atualizado_por: usuarioId
       };
 
-      await Menu.create(dados);
+      if (req.file) dadosPrato.imagem = req.file.filename;
+      
+      const pratoId = await Menu.create(dadosPrato);
+
+      // Salvar múltiplos tamanhos se fornecidos
+      if (temTamanhos) {
+        let tamanhosArray = [];
+
+        // Se tamanhos é array (JSON), usar diretamente
+        if (Array.isArray(tamanhos)) {
+          tamanhosArray = tamanhos
+            .filter(t => t.tamanho && t.preco)
+            .map(t => ({
+              tamanho: t.tamanho,
+              preco: parseFloat(t.preco)
+            }));
+        } else {
+          // Se tamanhos vem do FormData (formato: tamanhos[0][tamanho])
+          const keys = Object.keys(req.body);
+          const tamanhosMap = {};
+
+          keys.forEach(key => {
+            const match = key.match(/^tamanhos\[(\d+)\]\[(tamanho|preco)\]$/);
+            if (match) {
+              const index = match[1];
+              const field = match[2];
+              
+              if (!tamanhosMap[index]) {
+                tamanhosMap[index] = {};
+              }
+              tamanhosMap[index][field] = req.body[key];
+            }
+          });
+
+          tamanhosArray = Object.keys(tamanhosMap)
+            .map(index => tamanhosMap[index])
+            .filter(t => t.tamanho && t.preco)
+            .map(t => ({
+              tamanho: t.tamanho,
+              preco: parseFloat(t.preco)
+            }));
+        }
+        
+        if (tamanhosArray.length > 0) {
+          await Menu.criarTamanhos(pratoId, tamanhosArray);
+        }
+      }
+
       res.redirect('/menu');
     } catch (err) {
-      console.error('Erro ao cadastrar prato:', err);
-      res.status(500).send('Erro ao cadastrar prato');
+      console.error('Erro ao criar prato:', err);
+      res.status(500).send('Erro ao criar prato');
     }
   },
 
@@ -155,6 +226,73 @@ module.exports = {
     } catch (err) {
       console.error('Erro ao carregar cardápio público:', err);
       return res.status(500).send('Erro ao carregar cardápio público.');
+    }
+  },
+
+  buscarTamanhos: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const tamanhos = await Menu.buscarTamanhos(id);
+      res.json(tamanhos);
+    } catch (error) {
+      console.error('Erro ao buscar tamanhos:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  },
+
+  salvarTamanhos: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const tamanhos = [];
+
+      // Debug: ver o que está chegando
+      console.log('Body completo:', req.body);
+
+      // Verificar se req.body existe
+      if (!req.body || typeof req.body !== 'object') {
+        console.error('req.body está undefined ou não é um objeto');
+        return res.status(400).json({ error: 'Dados do formulário não foram recebidos corretamente' });
+      }
+
+      // Processar dados do formulário - formato: tamanhos[0][tamanho], tamanhos[0][preco]
+      const keys = Object.keys(req.body);
+      const tamanhosMap = {};
+
+      keys.forEach(key => {
+        const match = key.match(/^tamanhos\[(\d+)\]\[(tamanho|preco)\]$/);
+        if (match) {
+          const index = match[1];
+          const field = match[2];
+          
+          if (!tamanhosMap[index]) {
+            tamanhosMap[index] = {};
+          }
+          tamanhosMap[index][field] = req.body[key];
+        }
+      });
+
+      // Converter para array de tamanhos
+      Object.keys(tamanhosMap).forEach(index => {
+        const item = tamanhosMap[index];
+        if (item.tamanho && item.preco) {
+          tamanhos.push({
+            tamanho: item.tamanho,
+            preco: parseFloat(item.preco)
+          });
+        }
+      });
+
+      console.log('Tamanhos processados:', tamanhos);
+      
+      if (tamanhos.length === 0) {
+        return res.status(400).json({ error: 'Nenhum tamanho válido foi fornecido' });
+      }
+      
+      await Menu.criarTamanhos(id, tamanhos);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Erro ao salvar tamanhos:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
     }
   },
 };

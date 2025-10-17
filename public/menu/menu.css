@@ -277,3 +277,231 @@ select.form-box-input:focus {
 .card.is-archived .editable { pointer-events: none; }
 .card.is-archived .switch { opacity: .4; }
 .card .actions { display: flex; gap: .5rem; margin-top: .75rem; }
+
+
+/* Estilos para o sistema de múltiplos tamanhos */
+
+.precos-container {
+  margin: 10px 0;
+}
+
+.tamanhos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.tamanho-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.tamanho-label {
+  font-weight: bold;
+  font-size: 0.85em;
+  color: #495057;
+}
+
+.tamanho-preco {
+  font-size: 0.9em;
+  color: #28a745;
+  font-weight: 600;
+}
+
+/* Seção de preços no modal */
+.precos-section {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 15px 0;
+  background: #f8f9fa;
+}
+
+.precos-section h4 {
+  margin: 0 0 10px 0;
+  color: #495057;
+  font-size: 1em;
+}
+
+.checkbox-container {
+  margin-bottom: 15px;
+}
+
+.checkbox-container label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.checkbox-container input[type="checkbox"] {
+  margin-right: 8px;
+  width: auto;
+}
+
+.preco-input-group input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.multiplos-precos-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tamanho-preco-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.tamanho-preco-item select,
+.tamanho-preco-item input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.btn-remove-tamanho {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-remove-tamanho:hover {
+  background: #c82333;
+}
+
+.btn-add-tamanho {
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+}
+
+.btn-add-tamanho:hover {
+  background: #218838;
+}
+
+.btn-editar-tamanhos {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-editar-tamanhos:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+
+.btn-salvar {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-salvar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-cancelar {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-cancelar:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+/* Responsividade para tamanhos */
+@media (max-width: 768px) {
+  .tamanhos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .tamanho-preco-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+  }
+  
+  .btn-salvar, .btn-cancelar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .tamanhos-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .precos-section {
+    padding: 10px;
+  }
+  
+  .tamanho-preco-item {
+    padding: 8px;
+  }
+}

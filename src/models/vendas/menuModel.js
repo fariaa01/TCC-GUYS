@@ -47,11 +47,13 @@ module.exports = {
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    await db.query(sql, [
+    const [result] = await db.query(sql, [
       nome_prato, preco, descricao, imagem, usuario_id,
       destaque ? 1 : 0, ingredientes, categoria, tamanho, porcao,
       is_disponivel ? 1 : 0, arquivado ? 1 : 0, atualizado_por
     ]);
+    
+    return result.insertId;
   },
 
   update: async (id, dados) => {
@@ -89,4 +91,59 @@ module.exports = {
     );
     return rows;
   },
+
+  async criarTamanhos(pratoId, tamanhosPrecos) {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      await connection.execute('DELETE FROM prato_tamanhos WHERE prato_id = ?', [pratoId]);
+
+      for (const item of tamanhosPrecos) {
+        await connection.execute(
+          'INSERT INTO prato_tamanhos (prato_id, tamanho, preco) VALUES (?, ?, ?)',
+          [pratoId, item.tamanho, item.preco]
+        );
+      }
+
+      await connection.commit();  
+    }
+    catch (error) {
+      await connection.rollback();
+      throw error;
+    }
+    finally {
+      connection.release();
+    }
+  },
+
+  async buscarTamanhos(pratoId) {
+    const [rows] = await db.execute(
+      'SELECT id, tamanho, preco FROM prato_tamanhos WHERE prato_id = ? ORDER BY tamanho',
+      [pratoId]
+    );
+    return rows;
+  },
+
+  async listarTodos(usuario_id) {
+    const [pratos] = await db.execute(`
+
+      SELECT p.*, 
+             JSON_ARRAYAGG(
+               CASE WHEN pt.id IS NOT NULL 
+               THEN JSON_OBJECT('id', pt.id, 'tamanho', pt.tamanho, 'preco', pt.preco)
+               ELSE NULL END
+             ) as tamanhos_json
+      FROM pratos p
+      LEFT JOIN prato_tamanhos pt ON p.id = pt.prato_id
+      WHERE p.usuario_id = ?
+      GROUP BY p.id
+      ORDER BY p.created_at DESC
+    `, [usuario_id]);
+
+    return pratos.map(prato => ({
+      ...prato,
+      tamanhos: prato.tamanhos_json ? prato.tamanhos_json.filter(t => t !== null) : []
+    }));
+  }
 };
