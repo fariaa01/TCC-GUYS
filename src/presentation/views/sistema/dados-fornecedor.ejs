@@ -16,6 +16,17 @@
       <div class="search-bar">
         <i class="fas fa-search search-icon"></i>
         <input type="text" id="searchInput" placeholder="Buscar fornecedores...">
+
+        <div class="filter">
+          <label for="filtroCategoria">Filtrar por categoria:</label>
+          <select id="filtroCategoria">
+            <option value="todas" selected>Todas</option>
+            <% const categoriasUnicas = [...new Set(fornecedores.map(fornecedor => fornecedor.categoria))]; %>
+            <% categoriasUnicas.forEach(categoria => { %>
+              <option value="<%= categoria %>"><%= categoria %></option>
+            <% }) %>
+          </select>
+        </div>
       </div>
       <button id="btnAdicionarFornecedor" class="btn-add">
         <i class="fas fa-plus"></i>
@@ -171,6 +182,36 @@
           searchInput.blur();
         }
       });
+    });
+
+    document.getElementById('filtroCategoria').addEventListener('change', function() {
+      const categoriaSelecionada = this.value;
+      const table = document.querySelector('table tbody');
+      const rows = Array.from(table.querySelectorAll('tr'));
+
+      rows.forEach(row => {
+        const categoriaCell = row.querySelector('td[data-label="Categoria"]');
+        if (categoriaSelecionada === 'todas' || categoriaCell.textContent === categoriaSelecionada) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      const visibleRows = rows.filter(row => row.style.display !== 'none');
+      if (visibleRows.length === 0) {
+        if (!document.querySelector('.no-results')) {
+          const noResultsRow = document.createElement('tr');
+          noResultsRow.className = 'no-results';
+          noResultsRow.innerHTML = '<td colspan="8" style="text-align: center; padding: 40px; color: #6c757d; font-style: italic;">Nenhum fornecedor encontrado</td>';
+          table.appendChild(noResultsRow);
+        }
+      } else {
+        const noResultsRow = document.querySelector('.no-results');
+        if (noResultsRow) {
+          noResultsRow.remove();
+        }
+      }
     });
   </script>
 </body>

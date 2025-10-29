@@ -5,7 +5,11 @@
   --muted: #8aa095;
   --brand: #2fa36b;
   --brand-700: #258b5b;
+  --brand-701: #848b25;
+  --brand-702: #8b2525;
   --brand-50: #e9f6ee;
+  --brand-51: #f6f6e9;
+  --brand-52: #f6e9e9;
   --accent: #f5f8f6;
   --border: #e7ece9;
   --shadow: 0 10px 24px rgba(16, 24, 40, .06);
@@ -146,7 +150,7 @@ h1 { margin: 8px 0 14px; font-size: 22px; font-weight: 700; color: #1f2a23; }
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 14px;
   margin-bottom: 14px;
 }
@@ -168,7 +172,47 @@ h1 { margin: 8px 0 14px; font-size: 22px; font-weight: 700; color: #1f2a23; }
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
+  
 }
+
+.card1 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  
+}
+
+.card2 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  
+}
+
+a href .p {
+  cursor: pointer; 
+  text-decoration: none;
+  
+}
+#link {
+  text-decoration: none;
+  color: inherit;
+}
+
 .card::after {
   content: "";
   position: absolute;
@@ -179,6 +223,29 @@ h1 { margin: 8px 0 14px; font-size: 22px; font-weight: 700; color: #1f2a23; }
   border-radius: 50%;
   background: var(--brand-50);
 }
+
+.card1::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--brand-51);
+}
+
+.card2::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--brand-52);
+}
+
 .card i {
   width: 44px;
   height: 44px;
@@ -192,6 +259,34 @@ h1 { margin: 8px 0 14px; font-size: 22px; font-weight: 700; color: #1f2a23; }
 }
 .card p { margin: 0; z-index: 1; color: #4b5a51; }
 .card strong { display: block; font-size: 22px; color: #17231c; margin-top: 2px; }
+
+.card1 i {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--brand-51);
+  color: var(--brand-701);
+  font-size: 18px;
+  z-index: 1;
+}
+.card1 p { margin: 0; z-index: 1; color: #4b5a51; }
+.card1 strong { display: block; font-size: 22px; color: #17231c; margin-top: 2px; }
+
+.card2 i {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--brand-52);
+  color: var(--brand-702);
+  font-size: 18px;
+  z-index: 1;
+}
+.card2 p { margin: 0; z-index: 1; color: #4b5a51; }
+.card2 strong { display: block; font-size: 22px; color: #17231c; margin-top: 2px; }
 
 .separador {
   border: 0;
