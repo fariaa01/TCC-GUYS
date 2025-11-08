@@ -182,5 +182,25 @@ module.exports = {
       console.error('[fornecedorController.detalhes]', err);
       return next?.(err);
     }
+  },
+
+  novo: async (req, res, next) => {
+    try {
+      const usuarioId = req.session?.userId;
+      if (!usuarioId) {
+        return res.redirect('/login');
+      }
+      
+      // Renderiza a página de detalhes em modo de criação (sem fornecedor existente)
+      res.render('sistema/detalhes-fornecedor', { 
+        fornecedor: null, 
+        historicoCompras: [],
+        isNew: true 
+      });
+    }
+    catch(err) {
+      console.error('[fornecedorController.novo]', err);
+      return next?.(err);
+    }
   }
 };

@@ -37,7 +37,14 @@ function confirmarExclusao(id) {
 }
 
 function abrirModalEdicao(btn) {
+    console.log('Abrindo modal de edição');
     const dados = btn.dataset;
+    const modalEditar = document.getElementById("modalEditarFuncionario");
+    
+    if (!modalEditar) {
+      console.error('Modal de edição não encontrado!');
+      return;
+    }
     
     document.getElementById('editarId').value = dados.id;
     document.getElementById('editarNome').value = dados.nome;
@@ -55,8 +62,11 @@ function abrirModalEdicao(btn) {
     }
     
     const form = modalEditar.querySelector('form');
-    form.action = `/funcionarios/${dados.id}/update`;
+    if (form) {
+      form.action = `/funcionarios/${dados.id}/update`;
+    }
     
+    console.log('Mostrando modal de edição');
     modalEditar.style.display = "flex";
   }
 
@@ -66,21 +76,104 @@ function formatarDataBR(dataISO) {
   return d.toLocaleDateString('pt-BR');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+// Função para inicializar os modais
+function inicializarModais() {
+  console.log('Inicializando modais do funcionário');
+  
   const modal = document.getElementById("modalFuncionario");
   const modalEditar = document.getElementById("modalEditarFuncionario");
   const btnAbrir = document.getElementById("btnNovoFuncionario");
   const btnFechar = document.getElementById("fecharModal");
   const btnFecharEditar = modalEditar ? modalEditar.querySelector(".close") : null;
 
-  if (btnAbrir) btnAbrir.addEventListener("click", () => modal.style.display = "flex");
-  if (btnFechar) btnFechar.addEventListener("click", () => modal.style.display = "none");
-  if (btnFecharEditar) btnFecharEditar.addEventListener("click", () => modalEditar.style.display = "none");
+  console.log('Elementos encontrados:', {
+    modal: !!modal,
+    modalEditar: !!modalEditar,
+    btnAbrir: !!btnAbrir,
+    btnFechar: !!btnFechar,
+    btnFecharEditar: !!btnFecharEditar
+  });
+
+  // Event listener para abrir modal
+  if (btnAbrir) {
+    // Remove event listeners anteriores
+    btnAbrir.replaceWith(btnAbrir.cloneNode(true));
+    const novoBtnAbrir = document.getElementById("btnNovoFuncionario");
+    
+    novoBtnAbrir.addEventListener("click", function(e) {
+      console.log('Botão de abrir modal clicado');
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (modal) {
+        modal.style.display = "flex";
+        console.log('Modal aberto');
+      } else {
+        console.error('Modal não encontrado!');
+      }
+    });
+    console.log('Event listener do botão abrir adicionado');
+  } else {
+    console.error('Botão de abrir modal não encontrado!');
+  }
+  
+  // Event listener para fechar modal
+  if (btnFechar && modal) {
+    btnFechar.addEventListener("click", function(e) {
+      console.log('Botão de fechar modal clicado');
+      e.preventDefault();
+      modal.style.display = "none";
+    });
+  }
+  
+  // Event listener para fechar modal de edição
+  if (btnFecharEditar && modalEditar) {
+    btnFecharEditar.addEventListener("click", function(e) {
+      console.log('Botão de fechar modal editar clicado');
+      e.preventDefault();
+      modalEditar.style.display = "none";
+    });
+  }
+
+  return { modal, modalEditar, btnAbrir, btnFechar };
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM carregado - iniciando JavaScript do funcionário');
+  
+  // Pequeno delay para garantir que tudo está carregado
+  setTimeout(() => {
+    const elementos = inicializarModais();
+  }, 100);
+
+  // Configurar eventos adicionais
+  const modal = document.getElementById("modalFuncionario");
+  const modalEditar = document.getElementById("modalEditarFuncionario");
+  
+  // Fechar modal clicando fora dele
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        console.log('Clique fora do modal - fechando');
+        modal.style.display = "none";
+      }
+    });
+  }
+  
+  if (modalEditar) {
+    modalEditar.addEventListener('click', function(e) {
+      if (e.target === modalEditar) {
+        console.log('Clique fora do modal editar - fechando');
+        modalEditar.style.display = "none";
+      }
+    });
+  }
 
   document.addEventListener('click', function(e) {
     if (e.target.closest('.btn-editar')) {
       e.preventDefault();
       const btn = e.target.closest('.btn-editar');
+      console.log('Botão editar clicado:', btn.dataset);
       abrirModalEdicao(btn);
     }
   });
@@ -179,4 +272,38 @@ document.addEventListener('DOMContentLoaded', function() {
       mask: '(00) 00000-0000'
     });
   }
+
+  console.log('JavaScript do funcionário carregado com sucesso!');
+  console.log('Elementos finais check:', {
+    btnNovoFuncionario: !!document.getElementById("btnNovoFuncionario"),
+    modalFuncionario: !!document.getElementById("modalFuncionario"),
+    fecharModal: !!document.getElementById("fecharModal")
+  });
 });
+
+window.addEventListener('load', function() {
+  console.log('Window load - verificando elementos novamente');
+  
+  const btnAbrir = document.getElementById("btnNovoFuncionario");
+  const modal = document.getElementById("modalFuncionario");
+  
+  if (btnAbrir && modal && !btnAbrir.hasAttribute('data-listener-added')) {
+    console.log('Adicionando event listener via window.load');
+    btnAbrir.setAttribute('data-listener-added', 'true');
+    
+    btnAbrir.addEventListener("click", function(e) {
+      console.log('Modal aberto via fallback');
+      e.preventDefault();
+      modal.style.display = "flex";
+    });
+  }
+});
+
+// Função global como último recurso
+window.abrirModalFuncionario = function() {
+  console.log('Função global chamada');
+  const modal = document.getElementById("modalFuncionario");
+  if (modal) {
+    modal.style.display = "flex";
+  }
+};

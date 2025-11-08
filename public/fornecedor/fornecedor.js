@@ -41,18 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnOpenCreate) {
     btnOpenCreate.addEventListener('click', () => {
-      console.log('Botão clicado!');
-      if (formCreate) formCreate.reset();
-      if(selectTelAltCreate) {
-        selectTelAltCreate.value = 'nao';
-      }
-      if(telAltInputCreate) {
-        telAltInputCreate.style.display = 'none';
-      }
-      if (modalCreate) {
-        modalCreate.style.display = 'flex';
-        console.log('Modal deve estar visível agora');
-      }
+      console.log('Redirecionando para página de novo fornecedor...');
+      // Redireciona para a página de detalhes em modo de criação
+      window.location.href = '/dados-fornecedor/novo';
     });
   } else {
     console.error('Botão "btnAdicionarFornecedor" não encontrado!');
