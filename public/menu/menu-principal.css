@@ -1,0 +1,15 @@
+/* ============================================
+   MENU DE PRODUTOS - CSS PRINCIPAL
+   Sistema modularizado para fácil manutenção
+   ============================================ */
+
+/* Importar módulos CSS */
+@import url('css/variaveis.css');
+@import url('css/base.css');
+@import url('css/botoes.css');
+@import url('css/cards.css');
+@import url('css/modais.css');
+@import url('css/formularios.css');
+@import url('css/categorias.css');
+@import url('css/tamanhos.css');
+@import url('css/responsivo.css');

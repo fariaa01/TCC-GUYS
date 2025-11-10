@@ -1,4 +1,6 @@
 const Menu = require('../../models/vendas/menuModel');
+const Categoria = require('../../models/vendas/categoriaModel');
+const Tamanho = require('../../models/vendas/tamanhoModel');
 const Audit = require('../../models/sistema/auditModel');
 const Usuario = require('../../models/usuarios/userModel');
 const { criar } = require('../../models/sistema/funcionario/historicoSalarialModel');
@@ -10,7 +12,10 @@ module.exports = {
       if (!usuarioId) return res.redirect('/login');
 
       const pratos = await Menu.getAllByUsuario(usuarioId, { incluirArquivados: true });
-      res.render('vendas/menu', { pratos });
+      const categorias = await Categoria.listarPorUsuario(usuarioId);
+      const tamanhos = await Tamanho.listarPorUsuario(usuarioId);
+      
+      res.render('vendas/menu', { pratos, categorias, tamanhos });
     } catch (err) {
       console.error('Erro ao carregar o menu:', err);
       res.status(500).send('Erro ao carregar o menu');
@@ -48,7 +53,7 @@ module.exports = {
         nome_prato,
         ingredientes,
         quantidade: quantidade || null,
-        preco: temTamanhos ? null : precoNum, // Se tem tamanhos, preço = null
+        preco: temTamanhos ? 0.00 : precoNum,
         usuario_id: usuarioId,
         destaque: req.body.destaque ? 1 : 0,
         is_disponivel: req.body.is_disponivel ? 1 : 0,
@@ -243,56 +248,40 @@ module.exports = {
   salvarTamanhos: async (req, res) => {
     try {
       const { id } = req.params;
-      const tamanhos = [];
+      const { tamanhos } = req.body;
 
-      // Debug: ver o que está chegando
-      console.log('Body completo:', req.body);
+      console.log('Body recebido:', req.body);
 
-      // Verificar se req.body existe
-      if (!req.body || typeof req.body !== 'object') {
-        console.error('req.body está undefined ou não é um objeto');
-        return res.status(400).json({ error: 'Dados do formulário não foram recebidos corretamente' });
+      // Verificar se tamanhos foi enviado
+      if (!tamanhos || !Array.isArray(tamanhos)) {
+        return res.status(400).json({ 
+          ok: false, 
+          msg: 'Formato inválido: esperado array de tamanhos' 
+        });
       }
 
-      // Processar dados do formulário - formato: tamanhos[0][tamanho], tamanhos[0][preco]
-      const keys = Object.keys(req.body);
-      const tamanhosMap = {};
+      // Validar cada tamanho
+      const tamanhosValidos = tamanhos.filter(t => 
+        t.tamanho && t.preco !== undefined && t.preco !== null
+      );
 
-      keys.forEach(key => {
-        const match = key.match(/^tamanhos\[(\d+)\]\[(tamanho|preco)\]$/);
-        if (match) {
-          const index = match[1];
-          const field = match[2];
-          
-          if (!tamanhosMap[index]) {
-            tamanhosMap[index] = {};
-          }
-          tamanhosMap[index][field] = req.body[key];
-        }
-      });
-
-      // Converter para array de tamanhos
-      Object.keys(tamanhosMap).forEach(index => {
-        const item = tamanhosMap[index];
-        if (item.tamanho && item.preco) {
-          tamanhos.push({
-            tamanho: item.tamanho,
-            preco: parseFloat(item.preco)
-          });
-        }
-      });
-
-      console.log('Tamanhos processados:', tamanhos);
+      console.log('Tamanhos válidos:', tamanhosValidos);
       
-      if (tamanhos.length === 0) {
-        return res.status(400).json({ error: 'Nenhum tamanho válido foi fornecido' });
+      if (tamanhosValidos.length === 0) {
+        return res.status(400).json({ 
+          ok: false, 
+          msg: 'Nenhum tamanho válido foi fornecido' 
+        });
       }
       
-      await Menu.criarTamanhos(id, tamanhos);
-      res.json({ success: true });
+      await Menu.criarTamanhos(id, tamanhosValidos);
+      res.json({ ok: true, msg: 'Tamanhos salvos com sucesso' });
     } catch (error) {
       console.error('Erro ao salvar tamanhos:', error);
-      res.status(500).json({ error: 'Erro interno do servidor' });
+      res.status(500).json({ 
+        ok: false, 
+        msg: 'Erro interno do servidor' 
+      });
     }
   },
 };

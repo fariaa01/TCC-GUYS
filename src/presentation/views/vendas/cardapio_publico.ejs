@@ -13,7 +13,7 @@
         <header class="topbar">
           <h1><%= empresaNome %></h1>
           <div style="display:flex; gap:10px; align-items:center;">
-            <a href="/restaurantes" class="btn-ghost">Trocar restaurante</a>
+            <a href="/lojas" class="btn-ghost">Trocar loja</a>
             <button type="button" id="btnToggleCart" class="btn-carrinho" aria-label="Ver carrinho" data-endpoint-listar="/carrinho">
               <span class="icon" aria-hidden="true">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -70,19 +70,43 @@
                   <% } %>
 
                   <div class="card-footer">
-                    <strong class="preco">R$ <%= Number(i.preco).toFixed(2).replace('.', ',') %></strong>
-                    <button
-                      type="button"
-                      class="btn adicionar-carrinho"
-                      data-produto-id="<%= i.id %>"                      <!-- menu.id -->
-                      data-id="<%= i.id %>"
-                      data-preco="<%= Number(i.preco) %>"
-                      data-nome ="<%= i.nome_prato %>"
-                      data-img  ="<%= i.imagem ? ('/uploads/' + i.imagem) : '' %>"
-                      data-endpoint-adicionar="/carrinho/adicionar"
-                      aria-label="Adicionar <%= i.nome_prato %> ao carrinho">
-                      Adicionar
-                    </button>
+                    <% if (i.tamanhos && Array.isArray(i.tamanhos) && i.tamanhos.length > 0) { %>
+                      <div class="precos-multiplos">
+                        <strong class="preco-range">
+                          <% 
+                            const precos = i.tamanhos.map(t => Number(t.preco || 0)).filter(p => p > 0);
+                            const menorPreco = precos.length > 0 ? Math.min(...precos) : Number(i.preco || 0);
+                          %>
+                          A partir de R$ <%= menorPreco.toFixed(2).replace('.', ',') %>
+                        </strong>
+                        <small class="tamanhos-info"><%= i.tamanhos.length %> tamanhos disponíveis</small>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn adicionar-carrinho btn-escolher-tamanho"
+                        data-produto-id="<%= i.id %>"
+                        data-id="<%= i.id %>"
+                        data-nome="<%= i.nome_prato %>"
+                        data-img="<%= i.imagem ? ('/uploads/' + i.imagem) : '' %>"
+                        data-tamanhos='<%- JSON.stringify(i.tamanhos || []) %>'
+                        aria-label="Escolher tamanho para <%= i.nome_prato %>">
+                        Escolher Tamanho
+                      </button>
+                    <% } else { %>
+                      <strong class="preco">R$ <%= Number(i.preco).toFixed(2).replace('.', ',') %></strong>
+                      <button
+                        type="button"
+                        class="btn adicionar-carrinho"
+                        data-produto-id="<%= i.id %>"
+                        data-id="<%= i.id %>"
+                        data-preco="<%= Number(i.preco) %>"
+                        data-nome="<%= i.nome_prato %>"
+                        data-img="<%= i.imagem ? ('/uploads/' + i.imagem) : '' %>"
+                        data-endpoint-adicionar="/carrinho/adicionar"
+                        aria-label="Adicionar <%= i.nome_prato %> ao carrinho">
+                        Adicionar
+                      </button>
+                    <% } %>
                   </div>
                 </div>
               </div>
@@ -186,7 +210,46 @@
       </section>
     </div>
   </div>
-  <!-- ========== /MODAL LOGIN/CADASTRO ========== -->
+
+  <div id="modalTamanhos" class="modal-overlay" aria-hidden="true">
+    <div class="modal-content modal-tamanhos" role="dialog" aria-labelledby="modal-tamanhos-title">
+      <header class="modal-header">
+        <h3 id="modal-tamanhos-title">Escolha o tamanho</h3>
+        <button type="button" class="modal-close" aria-label="Fechar modal">&times;</button>
+      </header>
+      
+      <div class="modal-body">
+        <div class="produto-info">
+          <img id="modal-produto-img" src="" alt="" class="produto-thumb">
+          <div class="produto-detalhes">
+            <h4 id="modal-produto-nome"></h4>
+            <p class="produto-descricao">Escolha o tamanho desejado:</p>
+          </div>
+        </div>
+        
+        <div class="tamanhos-lista" id="tamanhosList">
+        </div>
+        
+        <div class="quantidade-controls">
+          <label for="modalQuantidade">Quantidade:</label>
+          <div class="qty-input">
+            <button type="button" class="qty-btn" data-action="decrease">-</button>
+            <input type="number" id="modalQuantidade" value="1" min="1" max="99">
+            <button type="button" class="qty-btn" data-action="increase">+</button>
+          </div>
+        </div>
+      </div>
+      
+      <footer class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-cancelar">Cancelar</button>
+        <button type="button" class="btn btn-primary modal-adicionar" disabled>
+          <span class="btn-text">Adicionar ao Carrinho</span>
+          <span class="btn-preco">R$ 0,00</span>
+        </button>
+      </footer>
+    </div>
+  </div>
+  <!-- ========== /MODAL SELEÇÃO DE TAMANHOS ========== -->
 
   <script nonce="<%= cspNonce %>" src="/cardapio/cardapio.js"></script>
 </body>

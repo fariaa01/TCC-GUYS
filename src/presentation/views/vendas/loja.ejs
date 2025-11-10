@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Escolher restaurante</title>
-  <link rel="stylesheet" href="/restaurante/restaurante.css"> 
+  <title>Escolher Loja</title>
+  <link rel="stylesheet" href="/loja/loja.css"> 
 </head>
 <body>
   <header class="navbar">
     <div class="container navbar__inner">
       <a href="/" class="navbar__brand" aria-label="Página inicial">
-        <span class="brand__logo" aria-hidden="true">🍔</span>
-        <span class="brand__text">Foodtruck</span>
+        <span class="brand__logo" aria-hidden="true">🛒</span>
+        <span class="brand__text">Loja Virtual</span>
       </a>
       <div class="navbar__actions">
       </div>
@@ -20,12 +20,12 @@
 
   <main class="container page">
     <header class="page__header">
-      <h1 class="page__title">Escolher restaurante</h1>
-      <p class="page__subtitle">Busque sua empresa e acesse o cardápio.</p>
+      <h1 class="page__title">Escolher Loja</h1>
+      <p class="page__subtitle">Busque sua loja e acesse o catálogo de produtos.</p>
     </header>
 
     <section class="card">
-      <form method="GET" action="/restaurantes" class="form" novalidate>
+      <form method="GET" action="/lojas" class="form" novalidate>
         <label for="q" class="label">Buscar por nome (opcional)</label>
         <div class="input-group">
           <span class="input-icon" aria-hidden="true">
@@ -43,7 +43,7 @@
             autocomplete="off"
           />
           <button type="submit" class="btn btn--primary">Buscar</button>
-          <a href="/restaurantes" class="btn btn--ghost">Limpar</a>
+          <a href="/lojas" class="btn btn--ghost">Limpar</a>
         </div>
         <p class="muted" aria-live="polite">
           <%= (typeof q !== 'undefined' && q) ? `Mostrando resultados para “${q}”.` : 'Dica: deixe em branco para listar tudo.' %>
@@ -52,12 +52,12 @@
 
       <% if (!resultados || !resultados.length) { %>
         <div class="empty">
-          <p class="empty__title">Nenhum restaurante encontrado</p>
+          <p class="empty__title">Nenhuma loja encontrada</p>
           <p class="muted">Tente outro termo ou clique em <strong>Limpar</strong>.</p>
         </div>
       <% } else { %>
-        <form method="POST" action="/restaurantes/ir" class="form" novalidate>
-          <label for="usuarioId" class="label">Restaurante</label>
+        <form method="POST" action="/lojas/ir" class="form" novalidate>
+          <label for="usuarioId" class="label">Loja Virtual</label>
           <div class="select-wrap">
             <select id="usuarioId" name="usuarioId" required class="select">
               <% resultados.forEach(r => { %>
@@ -70,15 +70,15 @@
           </div>
 
           <div class="row row--between">
-            <small class="muted"><%= resultados.length %> <%= resultados.length === 1 ? 'empresa encontrada' : 'empresas encontradas' %></small>
-            <button type="submit" class="btn btn--primary">Ver cardápio</button>
+            <small class="muted"><%= resultados.length %> <%= resultados.length === 1 ? 'loja encontrada' : 'lojas encontradas' %></small>
+            <button type="submit" class="btn btn--primary">Ver Produtos</button>
           </div>
         </form>
       <% } %>
     </section>
 
     <footer class="page__footer">
-      <p class="muted">© <%= new Date().getFullYear() %> • Sistema de Gestão Foodtruck</p>
+      <p class="muted">© <%= new Date().getFullYear() %> • Sistema de Gestão de Lojas Virtuais</p>
     </footer>
   </main>
 </body>

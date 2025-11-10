@@ -440,4 +440,188 @@
 
   const abrirAuthBtns = document.querySelectorAll('[data-open-auth]');
   abrirAuthBtns.forEach(b => b.addEventListener('click', () => openAuth('login')));
+
+  // ========= MODAL DE SELEÇÃO DE TAMANHOS =========
+  const modalTamanhos = $('#modalTamanhos');
+  const modalProdutoImg = $('#modal-produto-img');
+  const modalProdutoNome = $('#modal-produto-nome');
+  const tamanhosList = $('#tamanhosList');
+  const modalQuantidade = $('#modalQuantidade');
+  const modalAdicionar = $('.modal-adicionar');
+  const modalCancelar = $('.modal-cancelar');
+  const modalClose = $('.modal-close');
+
+  let produtoSelecionado = null;
+  let tamanhoSelecionado = null;
+
+  function abrirModalTamanhos(produtoData) {
+    produtoSelecionado = produtoData;
+    tamanhoSelecionado = null;
+
+    // Preencher informações do produto
+    if (modalProdutoImg) {
+      modalProdutoImg.src = produtoData.img || '';
+      modalProdutoImg.alt = produtoData.nome || '';
+      modalProdutoImg.style.display = produtoData.img ? 'block' : 'none';
+    }
+    if (modalProdutoNome) {
+      modalProdutoNome.textContent = produtoData.nome || 'Produto';
+    }
+
+    // Preencher lista de tamanhos
+    if (tamanhosList && produtoData.tamanhos) {
+      tamanhosList.innerHTML = produtoData.tamanhos.map((tamanho, index) => `
+        <div class="tamanho-option" data-index="${index}">
+          <div class="tamanho-info">
+            <div class="tamanho-nome">${tamanho.tamanho || 'Tamanho'}</div>
+            <div class="tamanho-descricao">${tamanho.descricao || ''}</div>
+          </div>
+          <div class="tamanho-preco">R$ ${Number(tamanho.preco || 0).toFixed(2).replace('.', ',')}</div>
+        </div>
+      `).join('');
+
+      // Adicionar event listeners para seleção de tamanho
+      $$('.tamanho-option', tamanhosList).forEach(option => {
+        option.addEventListener('click', () => {
+          // Remover seleção anterior
+          $$('.tamanho-option', tamanhosList).forEach(o => o.classList.remove('selected'));
+          
+          // Selecionar atual
+          option.classList.add('selected');
+          const index = parseInt(option.dataset.index);
+          tamanhoSelecionado = produtoData.tamanhos[index];
+          
+          // Atualizar botão de adicionar
+          atualizarBotaoAdicionar();
+        });
+      });
+    }
+
+    // Resetar quantidade
+    if (modalQuantidade) {
+      modalQuantidade.value = 1;
+    }
+
+    // Atualizar botão
+    atualizarBotaoAdicionar();
+
+    // Mostrar modal
+    if (modalTamanhos) {
+      modalTamanhos.classList.add('open');
+    }
+  }
+
+  function fecharModalTamanhos() {
+    if (modalTamanhos) {
+      modalTamanhos.classList.remove('open');
+    }
+    produtoSelecionado = null;
+    tamanhoSelecionado = null;
+  }
+
+  function atualizarBotaoAdicionar() {
+    if (!modalAdicionar) return;
+
+    const quantidade = parseInt(modalQuantidade?.value || 1);
+    const temTamanho = tamanhoSelecionado !== null;
+
+    if (temTamanho) {
+      const precoTotal = Number(tamanhoSelecionado.preco || 0) * quantidade;
+      modalAdicionar.disabled = false;
+      modalAdicionar.querySelector('.btn-preco').textContent = `R$ ${precoTotal.toFixed(2).replace('.', ',')}`;
+    } else {
+      modalAdicionar.disabled = true;
+      modalAdicionar.querySelector('.btn-preco').textContent = 'R$ 0,00';
+    }
+  }
+
+  // Event listeners para controles do modal
+  modalCancelar?.addEventListener('click', fecharModalTamanhos);
+  modalClose?.addEventListener('click', fecharModalTamanhos);
+
+  // Fechar modal clicando fora
+  modalTamanhos?.addEventListener('click', (e) => {
+    if (e.target === modalTamanhos) {
+      fecharModalTamanhos();
+    }
+  });
+
+  // Controles de quantidade
+  $$('.qty-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      const currentValue = parseInt(modalQuantidade?.value || 1);
+      
+      if (action === 'increase') {
+        modalQuantidade.value = Math.min(99, currentValue + 1);
+      } else if (action === 'decrease') {
+        modalQuantidade.value = Math.max(1, currentValue - 1);
+      }
+      
+      atualizarBotaoAdicionar();
+    });
+  });
+
+  // Atualizar quando quantidade for digitada
+  modalQuantidade?.addEventListener('input', () => {
+    const value = Math.max(1, Math.min(99, parseInt(modalQuantidade.value) || 1));
+    modalQuantidade.value = value;
+    atualizarBotaoAdicionar();
+  });
+
+  // Adicionar ao carrinho
+  modalAdicionar?.addEventListener('click', async () => {
+    if (!produtoSelecionado || !tamanhoSelecionado) return;
+
+    const quantidade = parseInt(modalQuantidade?.value || 1);
+    modalAdicionar.disabled = true;
+    
+    try {
+      // Adicionar item ao carrinho com o tamanho específico
+      await guarded(() => apiAddItem({
+        endpoint: '/carrinho/adicionar',
+        produto_id: produtoSelecionado.id,
+        quantidade: quantidade,
+        tamanho: tamanhoSelecionado.tamanho,
+        preco_unitario: tamanhoSelecionado.preco
+      }));
+      
+      // Feedback visual
+      modalAdicionar.querySelector('.btn-text').textContent = 'Adicionado!';
+      setTimeout(() => {
+        modalAdicionar.querySelector('.btn-text').textContent = 'Adicionar ao Carrinho';
+        fecharModalTamanhos();
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Erro ao adicionar ao carrinho:', error);
+      modalAdicionar.querySelector('.btn-text').textContent = 'Erro';
+      setTimeout(() => {
+        modalAdicionar.querySelector('.btn-text').textContent = 'Adicionar ao Carrinho';
+      }, 2000);
+    } finally {
+      modalAdicionar.disabled = false;
+    }
+  });
+
+  // Event listeners para botões "Escolher Tamanho"
+  $$('.btn-escolher-tamanho').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const produtoData = {
+        id: btn.dataset.id || btn.dataset.produtoId,
+        nome: btn.dataset.nome,
+        img: btn.dataset.img,
+        tamanhos: JSON.parse(btn.dataset.tamanhos || '[]')
+      };
+      
+      abrirModalTamanhos(produtoData);
+    });
+  });
+
+  // Tecla ESC para fechar modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalTamanhos?.classList.contains('open')) {
+      fecharModalTamanhos();
+    }
+  });
 })();

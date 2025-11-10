@@ -22,6 +22,15 @@ module.exports = {
     }
     sql += ' ORDER BY COALESCE(arquivado,0) ASC, id DESC';
     const [rows] = await db.query(sql, params);
+
+    for (const produto of rows) {
+      const [tamanhos] = await db.query(
+        'SELECT tamanho, preco FROM prato_tamanhos WHERE prato_id = ? ORDER BY preco ASC',
+        [produto.id]
+      );
+      produto.tamanhos = tamanhos;
+    }
+    
     return rows;
   },
 

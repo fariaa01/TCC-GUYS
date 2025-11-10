@@ -1,0 +1,302 @@
+
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green);
+  color: var(--white);
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(26, 188, 156, 0.3);
+}
+
+.btn-add:hover {
+  background: var(--green-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 188, 156, 0.4);
+}
+
+.btn-add i {
+  font-size: 18px;
+}
+
+/* Botões de Ação dos Cards */
+.btn-arquivar,
+.btn-restaurar,
+.btn-excluir,
+.btn-editar-tamanhos {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-arquivar {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-arquivar:hover {
+  background: #5a6268;
+}
+
+.btn-restaurar {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-restaurar:hover {
+  background: #138496;
+}
+
+.btn-excluir {
+  background: var(--red);
+  color: white;
+}
+
+.btn-excluir:hover {
+  background: var(--red-hover);
+}
+
+.btn-editar-tamanhos {
+  background: var(--blue);
+  color: white;
+  font-size: 12px;
+  padding: 6px 12px;
+  margin-top: 8px;
+}
+
+.btn-editar-tamanhos:hover {
+  background: #2980b9;
+}
+
+/* Botões de Formulário */
+.btn-cadastrar,
+.btn-avancar,
+.btn-cancelar,
+.btn-salvar {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-cadastrar,
+.btn-salvar {
+  background: var(--green);
+  color: white;
+  flex: 1;
+}
+
+.btn-cadastrar:hover,
+.btn-salvar:hover {
+  background: var(--green-hover);
+  transform: translateY(-2px);
+}
+
+.btn-avancar {
+  background: var(--green);
+  color: white;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.btn-avancar:hover {
+  background: var(--green-hover);
+}
+
+.btn-cancelar {
+  background: #6c757d;
+  color: white;
+  flex: 1;
+}
+
+.btn-cancelar:hover {
+  background: #5a6268;
+}
+
+/* Botões específicos de seções */
+.btn-gerenciar-categorias {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-gerenciar-categorias:hover {
+  background: #5a6268;
+}
+
+.btn-gerenciar-tamanhos-personalizados {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-gerenciar-tamanhos-personalizados:hover {
+  background: #5a6268;
+}
+
+.btn-gerenciar-tamanhos-personalizados-small {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-gerenciar-tamanhos-personalizados-small:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.btn-add-inline {
+  background: var(--green);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(26, 188, 156, 0.3);
+}
+
+.btn-add-inline:hover {
+  background: var(--green-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 188, 156, 0.4);
+}
+
+.btn-add-tamanho-inline {
+  background: var(--green);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-add-tamanho-inline:hover {
+  background: var(--green-hover);
+}
+
+.btn-add-tamanho {
+  background: var(--green);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.btn-add-tamanho:hover {
+  background: var(--green-hover);
+}
+
+.btn-remove-tamanho {
+  background: var(--red);
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-remove-tamanho:hover {
+  background: var(--red-hover);
+}
+
+/* Botões de Edição em Categorias/Tamanhos */
+.btn-edit-cat,
+.btn-delete-cat,
+.btn-editar-cat,
+.btn-excluir-cat {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.3s;
+  color: #666;
+  font-size: 14px;
+}
+
+.btn-edit-cat:hover,
+.btn-editar-cat:hover {
+  background: #e3f2fd;
+  color: var(--blue);
+  transform: scale(1.1);
+}
+
+.btn-delete-cat:hover,
+.btn-excluir-cat:hover {
+  background: #ffebee;
+  color: var(--red);
+  transform: scale(1.1);
+}
