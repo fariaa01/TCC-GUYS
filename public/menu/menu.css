@@ -276,6 +276,7 @@ input:disabled + .slider {
 .btn-arquivar,
 .btn-restaurar,
 .btn-excluir,
+.btn-editar-produto,
 .btn-editar-tamanhos {
   padding: 8px 16px;
   border: none;
@@ -328,7 +329,17 @@ input:disabled + .slider {
   background: #2980b9;
 }
 
-/* Seção de Tamanhos e Preços */
+.btn-editar-produto {
+  background: #3498db;
+  color: white;
+  box-shadow: 0 2px 6px rgba(243, 156, 18, 0.2);
+}
+
+.btn-editar-produto:hover {
+  background: #1c689b;
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+}
+
 .preco-tamanhos {
   margin: 10px 0;
 }

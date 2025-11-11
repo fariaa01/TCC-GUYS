@@ -1,13 +1,3 @@
-/**
- * ============================================
- * MENU - GERENCIAMENTO DE CATEGORIAS
- * ============================================
- * CRUD completo de categorias personalizadas
- */
-
-/**
- * Carrega e exibe todas as categorias do usuário
- */
 async function carregarCategorias() {
   try {
     const response = await fetch('/categorias');

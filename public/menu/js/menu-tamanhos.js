@@ -137,7 +137,6 @@ async function abrirModalTamanhos(pratoId, pratoNome) {
         const item = document.createElement('div');
         item.className = 'tamanho-item-card';
         
-        // Gerar options com tamanho atual selecionado
         let optionsTamanhos = '<option value="">Selecione o tamanho...</option>';
         tamanhosDisponiveis.forEach(t => {
           const selected = t.nome === tamanho.tamanho ? 'selected' : '';
@@ -203,16 +202,7 @@ function initTamanhos() {
     });
   }
 
-  document.addEventListener('click', async function(e) {
-    if (e.target.closest('.btn-editar-tamanhos')) {
-      const btn = e.target.closest('.btn-editar-tamanhos');
-      const pratoId = btn.dataset.id;
-      const pratoCard = btn.closest('.card');
-      const pratoNome = pratoCard.querySelector('h3').textContent;
-      
-      await abrirModalTamanhos(pratoId, pratoNome);
-    }
-  });
+
 
   const formEditarTamanhos = document.getElementById('formEditarTamanhos');
   if (formEditarTamanhos) {
@@ -266,7 +256,29 @@ function initTamanhos() {
     });
   }
 
-  console.log('Módulo de Tamanhos carregado');
+}
+
+// Função para abrir modal via onclick do HTML
+async function abrirModalTamanhosClick(pratoId, pratoNome) {
+  console.log('🎯 Função onclick chamada:', { pratoId, pratoNome });
+  
+  try {
+    // Tentar abrir o modal diretamente primeiro
+    const modal = document.getElementById('modalTamanhos');
+    console.log('📦 Modal encontrado:', modal);
+    
+    if (modal) {
+      modal.style.display = 'flex';
+      console.log('✨ Modal definido como flex');
+      
+      // Depois carregar os dados
+      await abrirModalTamanhos(pratoId, pratoNome);
+    } else {
+      console.error('❌ Modal não encontrado!');
+    }
+  } catch (error) {
+    console.error('❌ Erro na função onclick:', error);
+  }
 }
 
 window.adicionarTamanho = adicionarTamanho;
@@ -274,4 +286,5 @@ window.removerTamanho = removerTamanho;
 window.adicionarTamanhoEdit = adicionarTamanhoEdit;
 window.removerTamanhoEdit = removerTamanhoEdit;
 window.fecharModalTamanhos = fecharModalTamanhos;
+window.abrirModalTamanhosClick = abrirModalTamanhosClick;
 window.initTamanhos = initTamanhos;

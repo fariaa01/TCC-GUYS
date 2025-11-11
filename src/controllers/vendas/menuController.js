@@ -26,8 +26,7 @@ module.exports = {
     try {
       const usuarioId = req.session.userId;
       const { categoria, nome_prato, ingredientes, quantidade, preco, tamanhos } = req.body;
-      
-      // Validar se tem preço único OU múltiplos tamanhos
+
       const temPrecoUnico = preco !== undefined && preco !== '';
       const temTamanhos = tamanhos && Array.isArray(tamanhos) && tamanhos.length > 0;
       
@@ -38,8 +37,7 @@ module.exports = {
       if (!temPrecoUnico && !temTamanhos) {
         return res.status(400).send('Informe um preço único ou múltiplos tamanhos com preços.');
       }
-
-      // Processar preço único se fornecido
+o
       let precoNum = null;
       if (temPrecoUnico && !temTamanhos) {
         precoNum = Number(String(preco).replace(',', '.'));
@@ -65,11 +63,9 @@ module.exports = {
       
       const pratoId = await Menu.create(dadosPrato);
 
-      // Salvar múltiplos tamanhos se fornecidos
       if (temTamanhos) {
         let tamanhosArray = [];
 
-        // Se tamanhos é array (JSON), usar diretamente
         if (Array.isArray(tamanhos)) {
           tamanhosArray = tamanhos
             .filter(t => t.tamanho && t.preco)
@@ -78,7 +74,6 @@ module.exports = {
               preco: parseFloat(t.preco)
             }));
         } else {
-          // Se tamanhos vem do FormData (formato: tamanhos[0][tamanho])
           const keys = Object.keys(req.body);
           const tamanhosMap = {};
 
@@ -252,7 +247,6 @@ module.exports = {
 
       console.log('Body recebido:', req.body);
 
-      // Verificar se tamanhos foi enviado
       if (!tamanhos || !Array.isArray(tamanhos)) {
         return res.status(400).json({ 
           ok: false, 
@@ -260,7 +254,6 @@ module.exports = {
         });
       }
 
-      // Validar cada tamanho
       const tamanhosValidos = tamanhos.filter(t => 
         t.tamanho && t.preco !== undefined && t.preco !== null
       );
@@ -282,6 +275,31 @@ module.exports = {
         ok: false, 
         msg: 'Erro interno do servidor' 
       });
+    }
+  },
+
+  buscarProduto: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const usuarioId = req.session.userId;
+      
+      if (!usuarioId) {
+        return res.status(401).json({ ok: false, msg: 'Usuário não autenticado' });
+      }
+      
+      const produto = await Menu.getById(id, usuarioId);
+      
+      if (!produto) {
+        return res.status(404).json({ ok: false, msg: 'Produto não encontrado' });
+      }
+
+      const tamanhos = await Menu.buscarTamanhos(id);
+      produto.tamanhos = tamanhos;
+      
+      res.json({ ok: true, produto });
+    } catch (error) {
+      console.error('Erro ao buscar produto:', error);
+      res.status(500).json({ ok: false, msg: 'Erro interno do servidor' });
     }
   },
 };

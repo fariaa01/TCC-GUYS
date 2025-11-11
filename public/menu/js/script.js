@@ -1,23 +1,3 @@
-/**
- * ============================================
- * MENU - ARQUIVO PRINCIPAL (ORQUESTRADOR)
- * ============================================
- * Inicializa todos os módulos do sistema de gestão de cardápio
- * 
- * Módulos:
- * - menu-tamanhos.js: Gerenciamento de tamanhos e preços
- * - menu-categorias.js: CRUD de categorias personalizadas
- * - menu-modais.js: Controle de abertura/fechamento de modais
- * - menu-produtos.js: Edição, arquivar, excluir produtos
- */
-
-// ============================================
-// FUNÇÕES GLOBAIS (acessíveis via onclick)
-// ============================================
-
-/**
- * Adiciona um novo campo de tamanho/preço no formulário de cadastro
- */
 function adicionarTamanho() {
   const container = document.getElementById('multiplosPrecosList');
   const novoItem = document.createElement('div');
@@ -41,16 +21,10 @@ function adicionarTamanho() {
   contadorTamanhos++;
 }
 
-/**
- * Remove um campo de tamanho/preço
- */
 function removerTamanho(btn) {
   btn.closest('.tamanho-preco-item').remove();
 }
 
-/**
- * Adiciona um novo campo de tamanho/preço no modal de edição
- */
 function adicionarTamanhoEdit() {
   const container = document.getElementById('tamanhosEditList');
   const emptyState = document.getElementById('emptyState');
@@ -75,50 +49,33 @@ function adicionarTamanhoEdit() {
   container.appendChild(novoItem);
   contadorEdit++;
   
-  // Esconder estado vazio se houver itens
   if (emptyState) {
     emptyState.style.display = 'none';
   }
 }
 
-/**
- * Remove um campo de tamanho/preço do modal de edição
- */
+
 function removerTamanhoEdit(btn) {
   const container = document.getElementById('tamanhosEditList');
   const emptyState = document.getElementById('emptyState');
   
   btn.closest('.tamanho-item-card').remove();
   
-  // Mostrar estado vazio se não houver mais itens
   if (container.children.length === 0 && emptyState) {
     emptyState.style.display = 'block';
   }
 }
 
-/**
- * Fecha o modal de gerenciar tamanhos
- */
 function fecharModalTamanhos() {
   document.getElementById('modalTamanhos').style.display = 'none';
 }
 
-/**
- * Fecha o modal de gerenciar categorias
- */
 function fecharModalGerenciarCategorias() {
   document.getElementById('modalGerenciarCategorias').style.display = 'none';
 }
 
-// ============================================
-// INICIALIZAÇÃO QUANDO O DOM ESTIVER PRONTO
-// ============================================
-
 document.addEventListener('DOMContentLoaded', function() {
   
-  // ==========================================
-  // Toggle: Múltiplos Preços
-  // ==========================================
   const multiplosPrecos = document.getElementById('multiplosPrecos');
   if (multiplosPrecos) {
     multiplosPrecos.addEventListener('change', function() {
@@ -126,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const multiplosPrecosList = document.getElementById('multiplosPrecosList');
       
       if (this.checked) {
-        // Mostrar múltiplos tamanhos, esconder preço único
         precoUnico.style.display = 'none';
         precoUnico.querySelector('input').removeAttribute('required');
         
@@ -135,7 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
           el.setAttribute('required', 'required');
         });
       } else {
-        // Mostrar preço único, esconder múltiplos tamanhos
         precoUnico.style.display = 'block';
         precoUnico.querySelector('input').setAttribute('required', 'required');
         
@@ -147,95 +102,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ==========================================
-  // Botão: Adicionar Tamanho (Modal de Edição)
-  // ==========================================
   const btnAdicionarTamanho = document.getElementById('btnAdicionarTamanho');
   if (btnAdicionarTamanho) {
     btnAdicionarTamanho.addEventListener('click', adicionarTamanhoEdit);
   }
 
-  // ==========================================
-  // Abrir Modal: Editar Tamanhos
-  // ==========================================
-  document.addEventListener('click', async function(e) {
-    if (e.target.closest('.btn-editar-tamanhos')) {
-      const pratoId = e.target.closest('.btn-editar-tamanhos').dataset.id;
-      const pratoCard = e.target.closest('.card');
-      const pratoNome = pratoCard.querySelector('h3').textContent;
-      
-      // Definir ID do prato e nome no modal
-      document.getElementById('editPratoId').value = pratoId;
-      document.getElementById('pratoNomeModal').textContent = pratoNome;
-      
-      try {
-        // Carregar tamanhos existentes via API
-        const response = await fetch(`/menu/${pratoId}/tamanhos`);
-        
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const tamanhos = await response.json();
-        console.log('Tamanhos carregados:', tamanhos);
-        
-        const container = document.getElementById('tamanhosEditList');
-        const emptyState = document.getElementById('emptyState');
-        
-        // Limpar container
-        container.innerHTML = '';
-        contadorEdit = 0;
-        
-        if (tamanhos.length === 0) {
-          // Mostrar estado vazio
-          emptyState.style.display = 'block';
-        } else {
-          // Esconder estado vazio e carregar tamanhos
-          emptyState.style.display = 'none';
-          
-          tamanhos.forEach((tamanho, index) => {
-            const item = document.createElement('div');
-            item.className = 'tamanho-item-card';
-            item.innerHTML = `
-              <select name="tamanhos[${index}][tamanho]" class="tamanho-select" required>
-                <option value="">Selecione o tamanho...</option>
-                <option value="P" ${tamanho.tamanho === 'P' ? 'selected' : ''}>Pequeno (P)</option>
-                <option value="M" ${tamanho.tamanho === 'M' ? 'selected' : ''}>Médio (M)</option>
-                <option value="G" ${tamanho.tamanho === 'G' ? 'selected' : ''}>Grande (G)</option>
-                <option value="GG" ${tamanho.tamanho === 'GG' ? 'selected' : ''}>Gigante (GG)</option>
-              </select>
-              <input type="number" step="0.01" name="tamanhos[${index}][preco]" 
-                     class="preco-input" placeholder="Preço (R$)" 
-                     value="${tamanho.preco}" required />
-              <button type="button" class="btn-remove-tamanho" onclick="removerTamanhoEdit(this)">
-                <i class="fas fa-trash"></i>
-              </button>
-            `;
-            container.appendChild(item);
-            contadorEdit++;
-          });
-        }
-        
-        // Abrir modal
-        document.getElementById('modalTamanhos').style.display = 'flex';
-        
-      } catch (error) {
-        console.error('Erro ao carregar tamanhos:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro',
-          text: 'Não foi possível carregar os tamanhos do produto. ' + error.message
-        });
-      }
-    }
-  });
 
-  // ==========================================
-  // Modais: Categoria e Produto
-  // ==========================================
   const btnAbrirCategoria = document.getElementById("btnAbrirCategoria");
   const modalCategoria = document.getElementById("modalCategoria");
   const modalPedido = document.getElementById("modalPedido");
@@ -248,13 +120,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const tituloModal = document.getElementById("tituloModal");
 
   if (btnAbrirCategoria) {
-    // Abrir modal de categoria
     btnAbrirCategoria.onclick = () => {
       modalCategoria.style.display = "flex";
     };
   }
 
-  // Botão Gerenciar Categorias
   const btnGerenciarCategorias = document.getElementById("btnGerenciarCategorias");
   if (btnGerenciarCategorias) {
     btnGerenciarCategorias.onclick = () => {
@@ -276,9 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // ==========================================
-  // Botão Avançar: Categoria → Cadastro
-  // ==========================================
+
   const btnAvancar = document.getElementById("btnAvancar");
   if (btnAvancar) {
     btnAvancar.onclick = () => {
@@ -293,27 +161,20 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
 
-      // Preencher campo oculto com a categoria
       inputCategoria.value = categoria;
-      
-      // Atualizar título do modal
+
       const categoriaFormatada = categoria.charAt(0).toUpperCase() + categoria.slice(1);
       tituloModal.innerText = "Novo Produto - " + categoriaFormatada;
-      
-      // Limpar campos dinâmicos (agora não há campos específicos, apenas um campo genérico opcional)
+
       camposDinamicos.innerHTML = `
         <input type="text" name="detalhes" placeholder="Detalhes adicionais (opcional)" class="form-box-input" />
       `;
 
-      // Fechar modal de categoria e abrir modal de cadastro
       modalCategoria.style.display = "none";
       modalPedido.style.display = "flex";
     };
   }
 
-  // ==========================================
-  // Edição Inline de Campos (nome e preço)
-  // ==========================================
   const grid = document.querySelector('.grid-cards');
   if (grid) {
     grid.addEventListener('dblclick', async (e) => {
@@ -325,7 +186,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const field = editable.dataset.field;
       const oldValue = editable.textContent.trim();
 
-      // Criar input para edição
       const input = document.createElement('input');
       input.type = field === 'preco' ? 'number' : 'text';
       input.step = field === 'preco' ? '0.01' : undefined;
@@ -337,7 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
       input.focus();
       input.select();
 
-      // Salvar ao perder foco ou pressionar Enter
       const salvar = async () => {
         const newValue = input.value.trim();
         if (!newValue || newValue === oldValue) {
@@ -395,9 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ==========================================
-  // Confirmação de Exclusão
-  // ==========================================
+
   document.querySelectorAll('.form-excluir').forEach(form => {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -419,13 +276,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // ==========================================
-  // Gerenciamento de Categorias
-  // ==========================================
-
-  /**
-   * Carrega e exibe todas as categorias
-   */
   async function carregarCategorias() {
     try {
       const response = await fetch('/categorias');
@@ -470,7 +320,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Formulário de Nova Categoria
   const formNovaCategoria = document.getElementById('formNovaCategoria');
   if (formNovaCategoria) {
     formNovaCategoria.addEventListener('submit', async function(e) {
@@ -506,14 +355,11 @@ document.addEventListener('DOMContentLoaded', function() {
             showConfirmButton: false
           });
 
-          // Limpar formulário
           document.getElementById('inputNomeCategoria').value = '';
           document.getElementById('inputIconeCategoria').value = '📦';
 
-          // Recarregar lista
           await carregarCategorias();
-          
-          // Atualizar select do modal de categoria
+
           await atualizarSelectCategorias();
         } else {
           Swal.fire({
@@ -533,9 +379,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  /**
-   * Atualiza o select de categorias no modal de escolha
-   */
   async function atualizarSelectCategorias() {
     try {
       const response = await fetch('/categorias');
@@ -553,7 +396,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Fechar modal ao clicar fora
   window.onclick = (event) => {
     if (event.target === modalCategoria) {
       modalCategoria.style.display = "none";
@@ -569,16 +411,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  console.log('✅ Sistema de Gestão de Cardápio carregado com sucesso!');
 });
 
-// ==========================================
-// Funções Globais para Gerenciar Categorias
-// ==========================================
 
-/**
- * Edita uma categoria
- */
 async function editarCategoria(id, nomeAtual, iconeAtual) {
   const { value: formValues } = await Swal.fire({
     title: 'Editar Categoria',
@@ -616,7 +451,6 @@ async function editarCategoria(id, nomeAtual, iconeAtual) {
           showConfirmButton: false
         });
 
-        // Recarregar lista
         await carregarCategorias();
         await atualizarSelectCategorias();
       } else {
@@ -637,9 +471,55 @@ async function editarCategoria(id, nomeAtual, iconeAtual) {
   }
 }
 
-/**
- * Exclui uma categoria
- */
+async function excluirProduto(id, nome) {
+  const result = await Swal.fire({
+    title: 'Confirmar exclusão',
+    text: `Deseja realmente excluir o produto "${nome}"?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#e74c3c',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Sim, excluir',
+    cancelButtonText: 'Cancelar'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const response = await fetch(`/menu/${id}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Excluído!',
+          text: data.msg,
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        location.reload();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro',
+          text: data.msg || 'Erro ao excluir produto'
+        });
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Erro',
+        text: 'Erro ao excluir produto'
+      });
+    }
+  }
+}
+
+
 async function excluirCategoria(id, nome) {
   const result = await Swal.fire({
     title: 'Confirmar exclusão',
@@ -669,7 +549,6 @@ async function excluirCategoria(id, nome) {
           showConfirmButton: false
         });
 
-        // Recarregar lista
         await carregarCategorias();
         await atualizarSelectCategorias();
       } else {
@@ -690,9 +569,7 @@ async function excluirCategoria(id, nome) {
   }
 }
 
-/**
- * Atualiza o select de categorias (função auxiliar global)
- */
+
 async function atualizarSelectCategorias() {
   try {
     const response = await fetch('/categorias');
@@ -712,9 +589,7 @@ async function atualizarSelectCategorias() {
   }
 }
 
-/**
- * Carrega categorias (função auxiliar global)
- */
+
 async function carregarCategorias() {
   try {
     const response = await fetch('/categorias');

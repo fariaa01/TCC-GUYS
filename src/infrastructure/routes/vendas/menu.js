@@ -25,10 +25,12 @@ const upload = multer({
 router.use(ensureAuth);
 
 router.get('/', menuController.renderMenu);
+router.get('/:id', menuController.buscarProduto);
 router.post('/create', upload.single('imagem'), menuController.criarPrato);
 router.get('/:id/tamanhos', menuController.buscarTamanhos);
 router.post('/:id/tamanhos', express.urlencoded({ extended: true }), menuController.salvarTamanhos);
 router.post('/edit/:id', upload.single('imagem'), menuController.editarPrato);
+router.put('/:id', upload.single('imagem'), menuController.editarPrato);
 router.post(['/delete/:id', '/excluir/:id'], menuController.excluirPrato);
 
 router.patch('/:id', menuController.updateParcial);
