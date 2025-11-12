@@ -22,6 +22,18 @@ module.exports = {
         [usuarioId]
       );
 
+      // Contagem de itens que vencem nos próximos 30 dias
+      const [[{ proximos_vencimento }]] = await db.query(
+        `SELECT COUNT(*) as proximos_vencimento FROM estoque WHERE usuario_id = ? AND validade >= CURRENT_DATE() AND validade <= DATE_ADD(CURRENT_DATE(), INTERVAL 7 DAY)`,
+        [usuarioId]
+      );
+
+      // Contagem de itens já vencidos
+      const [[{ vencidos }]] = await db.query(
+        `SELECT COUNT(*) as vencidos FROM estoque WHERE usuario_id = ? AND validade < CURRENT_DATE()`,
+        [usuarioId]
+      );
+
       const [[{ total_entrada }]] = await db.query(
         `SELECT SUM(valor) as total_entrada 
          FROM financeiro 
@@ -51,7 +63,7 @@ module.exports = {
         WHERE usuario_id = ?
         GROUP BY MONTH(data)
         ORDER BY mes
-      `, [usuarioId]);
+      `, [usuarioId]);;
 
       const entradas = Array(12).fill(0);
       const saidas = Array(12).fill(0);
@@ -68,6 +80,8 @@ module.exports = {
         total_func,
         total_estoque,
         produtos_em_baixa,
+  proximos_vencimento,
+  vencidos,
         total_entrada: (parseFloat(total_entrada) || 0).toFixed(2),
         total_saida: (parseFloat(total_saida) || 0).toFixed(2),
         entradas,

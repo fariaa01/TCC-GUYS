@@ -69,9 +69,54 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   if (formCreate) {
-    formCreate.addEventListener('submit', e => {
+    formCreate.addEventListener('submit', async e => {
+      e.preventDefault();
       if (modalCreate) modalCreate.style.display = 'none';
       Swal.fire({ title: 'Adicionando fornecedor...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+      try {
+        const action = formCreate.getAttribute('action') || window.location.pathname;
+        const body = new URLSearchParams(new FormData(formCreate));
+        const resp = await fetch(action, {
+          method: 'POST',
+          body,
+          credentials: 'same-origin',
+          headers: { 'Accept': 'application/json' }
+        });
+
+        // Se o servidor redirecionou (por ex. para login), o fetch não segue visualmente o redirect
+        if (resp.redirected) {
+          window.location = resp.url;
+          return;
+        }
+
+        const contentType = resp.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await resp.json();
+          if (resp.ok && data.ok) {
+            Swal.fire({ icon: 'success', title: 'Fornecedor adicionado', text: data.message || '' }).then(() => location.reload());
+          } else {
+            Swal.fire({ icon: 'error', title: 'Erro', text: data.error || 'Erro ao adicionar fornecedor.' });
+          }
+        } else {
+          // Pode ser HTML (redirect page) ou um redirect status. Vamos pegar o texto e checar por padrão.
+          const text = await resp.text();
+          // Se o servidor respondeu com redirect via 302, o fetch pode retornar 200 com HTML de login.
+          if (resp.status === 401 || text.toLowerCase().includes('login')) {
+            Swal.fire({ icon: 'warning', title: 'Não autenticado', text: 'Você precisa estar logado para adicionar fornecedores.' }).then(() => { window.location = '/login'; });
+          } else if (resp.status === 409 || text.toLowerCase().includes('já existe') || text.toLowerCase().includes('duplicate')) {
+            Swal.fire({ icon: 'error', title: 'Duplicado', text: 'Fornecedor com mesmo CNPJ já existe.' });
+          } else if (resp.ok) {
+            // Se servidor retornou HTML mas com sucesso, recarrega
+            location.reload();
+          } else {
+            Swal.fire({ icon: 'error', title: 'Erro', text: 'Erro ao adicionar fornecedor.' });
+          }
+        }
+      } catch (err) {
+        console.error('Erro no fetch de create fornecedor:', err);
+        Swal.fire({ icon: 'error', title: 'Erro', text: 'Falha na comunicação com o servidor.' });
+      }
     });
   }
 

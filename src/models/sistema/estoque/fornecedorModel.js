@@ -5,26 +5,34 @@ function onlyDigits(str = '') {
 }
 
 module.exports = {
-  async create({ nome, email, cnpj, telefone, telefone_alternativo, pessoa_responsavel, categoria }, usuarioId) {
+  async create({ nome, email, cnpj, telefone }, usuarioId) {
     if (!usuarioId) throw new Error('usuarioId ausente em fornecedorModel.create');
 
     const cnpjDigits = cnpj ? onlyDigits(cnpj) : null;
+    // Verifica duplicidade de CNPJ para o mesmo usuário antes de inserir
+    if (cnpjDigits) {
+      const [existing] = await pool.execute(
+        'SELECT id FROM fornecedores WHERE usuario_id = ? AND cnpj = ? LIMIT 1',
+        [usuarioId, cnpjDigits]
+      );
+      if (existing && existing.length > 0) {
+        const err = new Error('CNPJ já cadastrado para este usuário');
+        err.code = 'DUP_CNPJ';
+        throw err;
+      }
+    }
+    // Inserir apenas colunas básicas que existem na maioria dos esquemas.
     const sql = `
       INSERT INTO fornecedores
-        (usuario_id, nome, email, cnpj, telefone, telefone_alternativo, pessoa_responsavel, categoria, tem_telefone_alternativo, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        (usuario_id, nome, email, cnpj, telefone, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, NOW(), NOW())
     `;
-    const temTelefoneAlternativo = telefone_alternativo && telefone_alternativo.trim() !== '' ? 'sim' : 'nao';
     const params = [
       usuarioId,
       nome,
       email || null,
       cnpjDigits || null,
-      telefone || null,
-      telefone_alternativo || null,
-      pessoa_responsavel || null,
-      categoria || null,
-      temTelefoneAlternativo
+      telefone || null
     ];
     const [result] = await pool.execute(sql, params);
     return { id: result.insertId };
@@ -32,15 +40,14 @@ module.exports = {
 
   async listarTodos(usuarioId) {
     if (!usuarioId) throw new Error('usuarioId ausente em listarTodos');
-    const [rows] = await pool.query(
-      `SELECT id, nome, email, cnpj, telefone, telefone_alternativo, categoria, pessoa_responsavel, tem_telefone_alternativo
-       FROM fornecedores
-       WHERE usuario_id = ?
-       ORDER BY nome ASC`,
-      [usuarioId]
-    );
+    // Selecionar apenas id/nome garante compatibilidade com o dropdown do estoque
+    const sql = `SELECT id, nome FROM fornecedores WHERE usuario_id = ? ORDER BY nome ASC`;
+    const [rows] = await pool.query(sql, [usuarioId]);
     return rows;
   },
+
+
+  
 
   async findAll(usuarioId) {
     return module.exports.listarTodos(usuarioId);
@@ -54,12 +61,10 @@ module.exports = {
     if (!usuarioId) throw new Error('usuarioId ausente em fornecedorModel.update');
     if (!id) throw new Error('id ausente em fornecedorModel.update');
 
+    // Atualizar apenas colunas básicas para evitar ER_BAD_FIELD_ERROR
     const sql = `
       UPDATE fornecedores SET
-        nome = ?, email = ?, cnpj = ?, telefone = ?, telefone_alternativo = ?, pessoa_responsavel = ?, categoria = ?,
-        website = ?, cep = ?, rua = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?,
-        formas_pagamento = ?, banco = ?, agencia = ?, conta = ?, tipo_conta = ?, chave_pix = ?, favorecido = ?,
-        limite_credito = ?, tem_telefone_alternativo = ?, updated_at = NOW()
+        nome = ?, email = ?, cnpj = ?, telefone = ?, updated_at = NOW()
       WHERE id = ? AND usuario_id = ?
     `;
     const params = [
@@ -67,26 +72,6 @@ module.exports = {
       data.email || null,
       data.cnpj || null,
       data.telefone || null,
-      data.telefone_alternativo || null,
-      data.pessoa_responsavel || null,
-      data.categoria || null, 
-      data.website || null,
-      data.cep || null,
-      data.rua || null,
-      data.numero || null,
-      data.complemento || null,
-      data.bairro || null,
-      data.cidade || null,
-      data.estado || null,
-      data.formas_pagamento || null,
-      data.banco || null,
-      data.agencia || null,
-      data.conta || null,
-      data.tipo_conta || null,
-      data.chave_pix || null,
-      data.favorecido || null,
-      data.limite_credito !== undefined && data.limite_credito !== '' ? data.limite_credito : null,
-      data.temTelefoneAlternativo || 'nao',
       id,
       usuarioId
     ];
