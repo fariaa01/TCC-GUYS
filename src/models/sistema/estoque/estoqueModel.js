@@ -22,49 +22,28 @@ function buildFilters({ categoria, fornecedor, validade, usuarioId }) {
 }
 
 function normStr(v) {
-  let sql = `SELECT 
-      id, produto, categoria, quantidade, quantidade_minima,
-      unidade_medida, valor, validade, fornecedor, usuario_id
-    FROM estoque
-    WHERE usuario_id = ?`;
-  const params = [usuarioId];
-
-  if (categoria) { sql += ` AND categoria = ?`; params.push(categoria); }
-  if (fornecedor) { sql += ` AND fornecedor = ?`; params.push(fornecedor); }
-  if (validade === 'vencido') {
-    sql += ` AND validade IS NOT NULL AND validade < CURRENT_DATE()`;
-  } else if (validade === 'proximo') {
-    sql += ` AND validade IS NOT NULL 
-             AND validade BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL 7 DAY)`;
-  }
-
-  sql += ` ORDER BY produto ASC`;
-  return { sql, params };
-}
-
-function normStr(v) {
   if (v === undefined) return undefined;
   if (v === null) return null;
   const s = String(v).trim();
   return s === '' ? null : s;
 }
+
 function parseNum(v, fallback = 0) {
   if (v === undefined) return undefined;
   if (v === null || v === '') return null;
   const n = Number(String(v).replace(',', '.'));
   return Number.isFinite(n) ? n : fallback;
 }
+
 function parseMoney(v, fallback = 0) {
   return parseNum(v, fallback);
 }
+
 function parseDateOrNull(v) {
   if (v === undefined) return undefined;
   if (v === null || v === '') return null;
   return v;
 }
-
-module.exports = {
-  }
 
 module.exports = {
   async getFiltrado({ categoria, fornecedor, validade, usuarioId }) {
@@ -187,11 +166,13 @@ module.exports = {
   },
 
   async getHistoricoComprasPorFornecedor(fornecedor, usuarioId) {
+    // Nem todas as bases possuem coluna de data explícita. Retornamos data_compra como NULL
+    // e ordenamos pelo id (últimos registros primeiro) para manter comportamento razoável.
     const sql = `
-      SELECT produto, categoria, quantidade, valor, validade, data_compra
+      SELECT id, produto, categoria, quantidade, valor, validade, NULL AS data_compra
       FROM estoque
       WHERE fornecedor = ? AND usuario_id = ?
-      ORDER BY data_compra DESC
+      ORDER BY id DESC
     `;
     const [rows] = await pool.query(sql, [fornecedor, usuarioId]);
     return rows;

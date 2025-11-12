@@ -47,10 +47,10 @@
          <div class="card"><i class="fas fa-box-open"></i> <a href="/estoque" id="link"><p>Produtos em Baixa<br><strong><%= produtos_em_baixa %> itens</strong></a></p></div>
 
 
-        <div class="card1"><i class="fa-solid fa-calendar-days"></i> <a href="/estoque" id="link"><p>Proximos ao vencimento<br><strong><%= total_func %> itens</strong></a></p></div>
+         <div class="card1"><i class="fa-solid fa-calendar-days"></i> <a href="/estoque" id="link"><p>Próximos ao vencimento<br><strong><%= proximos_vencimento || 0 %> itens</strong></a></p></div>
 
         
-        <div class="card2"><i class="fa-solid fa-calendar-days"></i> <a href="/estoque" id="link"> <p>Vencimentos<br><strong><%= total_func %> itens</strong></a></p></div>
+        <div class="card2"><i class="fa-solid fa-calendar-days"></i> <a href="/estoque" id="link"> <p>Vencidos<br><strong><%= vencidos || 0 %> itens</strong></a></p></div>
 
       </div>      <hr class="separador">
 

@@ -81,8 +81,8 @@ module.exports = {
     } catch (err) {
       console.error('Erro ao cadastrar fornecedor:', err);
 
-      if (err && err.code === 'ER_DUP_ENTRY') {
-        const msg = 'Já existe fornecedor com estes dados para o seu usuário.';
+      if (err && (err.code === 'ER_DUP_ENTRY' || err.code === 'DUP_CNPJ')) {
+        const msg = 'Já existe fornecedor com este CNPJ para o seu usuário.';
         return wantsJSON(req)
           ? res.status(409).json({ error: msg })
           : res.redirect('/dados-fornecedor?ok=0&msg=' + encodeURIComponent(msg));
