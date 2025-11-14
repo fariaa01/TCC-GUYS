@@ -77,9 +77,7 @@
           <% } %>
 
           <div class="actions">
-            <button type="button" class="btn-editar-tamanhos" data-id="<%= p.id %>">
-              <i class="fas fa-ruler"></i> Tamanhos
-            </button>
+            <!-- Tamanhos removido conforme solicitado -->
 
             <% if (p.arquivado) { %>
               <button type="button" class="btn-restaurar" data-id="<%= p.id %>">
@@ -185,35 +183,11 @@
     </div>
   </div>
 
-  <!-- Modal Editar Tamanhos -->
-  <div id="modalTamanhos" class="modal">
-    <div class="modal-content">
-      <span class="close" id="fecharModalTamanhos">&times;</span>
-      <h3>Gerenciar Tamanhos e Preços</h3>
-      <form id="formTamanhos">
-        <input type="hidden" id="editPratoId" />
-        
-        <div id="tamanhosEditList" class="multiplos-precos-container">
-          <!-- Tamanhos serão carregados dinamicamente -->
-        </div>
-        
-        <button type="button" class="btn-add-tamanho" onclick="adicionarTamanhoEdit()">
-          <i class="fas fa-plus"></i> Adicionar Tamanho
-        </button>
-        
-        <div class="modal-buttons">
-          <button type="submit" class="btn-salvar">Salvar Alterações</button>
-          <button type="button" class="btn-cancelar" onclick="fecharModalTamanhos()">Cancelar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script nonce="<%= cspNonce %>" src=""></script>
+  <!-- Modal de tamanhos removido -->
 
   <script nonce="<%= cspNonce %>" src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
   <script nonce="<%= cspNonce %>" src="/menu/js/menu-inline.js" defer></script>
-  <script nonce="<%= cspNonce %>" src="/menu/js/menu-modals.js" defer></script>
+  <script nonce="<%= cspNonce %>" src="/menu/js/menu-modal.js" defer></script>
   <script nonce="<%= cspNonce %>" src="/menu/js/upload-zone.js" defer></script>
   <script nonce="<%= cspNonce %>" src="/menu/js/script.js" defer></script>
 </body>

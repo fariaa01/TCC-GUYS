@@ -5,21 +5,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const multiplosPrecos = document.getElementById('multiplosPrecos');
     if (multiplosPrecos) {
       multiplosPrecos.addEventListener('change', function() {
-      const precoUnico = document.getElementById('precoUnico');
-      const multiplosPrecos = document.getElementById('multiplosPrecosList');
+        const precoUnico = document.getElementById('precoUnico');
+        const multiplosPrecosList = document.getElementById('multiplosPrecosList');
       
-      if (this.checked) {
-        precoUnico.style.display = 'none';
-        precoUnico.querySelector('input').removeAttribute('required');
-        multiplosPrecos.style.display = 'block';
-        multiplosPrecos.querySelectorAll('input, select').forEach(el => el.setAttribute('required', 'required'));
-      } else {
-        precoUnico.style.display = 'block';
-        precoUnico.querySelector('input').setAttribute('required', 'required');
-        multiplosPrecos.style.display = 'none';
-        multiplosPrecos.querySelectorAll('input, select').forEach(el => el.removeAttribute('required'));
-      }
-    });
+        if (this.checked) {
+          precoUnico.style.display = 'none';
+          const inputUnico = precoUnico.querySelector('input');
+          if (inputUnico) inputUnico.removeAttribute('required');
+          multiplosPrecosList.style.display = 'block';
+          multiplosPrecosList.querySelectorAll('input, select').forEach(el => { el.removeAttribute('disabled'); el.setAttribute('required', 'required'); });
+        } else {
+          precoUnico.style.display = 'block';
+          const inputUnico = precoUnico.querySelector('input');
+          if (inputUnico) inputUnico.setAttribute('required', 'required');
+          multiplosPrecosList.style.display = 'none';
+          multiplosPrecosList.querySelectorAll('input, select').forEach(el => { el.removeAttribute('required'); el.setAttribute('disabled', 'disabled'); });
+        }
+      });
+
+      // Aplica estado inicial (remove required de campos escondidos) para evitar validação nativa em elementos não focusáveis
+      multiplosPrecos.dispatchEvent(new Event('change'));
+    }
 
     function adicionarTamanho() {
       const container = document.getElementById('multiplosPrecosList');
@@ -49,127 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
       btn.closest('.tamanho-preco-item').remove();
     }
 
-    // Adicionar tamanho no modal de edição
-    function adicionarTamanhoEdit() {
-      const container = document.getElementById('tamanhosEditList');
-      const novoItem = document.createElement('div');
-      novoItem.className = 'tamanho-preco-item';
-      novoItem.innerHTML = `
-        <select name="tamanhos[${contadorEdit}][tamanho]" required>
-          <option value="">Tamanho...</option>
-          <option value="P">Pequeno (P)</option>
-          <option value="M">Médio (M)</option>
-          <option value="G">Grande (G)</option>
-          <option value="GG">Gigante (GG)</option>
-        </select>
-        <input type="number" step="0.01" name="tamanhos[${contadorEdit}][preco]" placeholder="Preço (R$)" required />
-        <button type="button" class="btn-remove-tamanho" onclick="removerTamanho(this)">
-          <i class="fas fa-trash"></i>
-        </button>
-      `;
-      
-      const btnAdd = container.querySelector('.btn-add-tamanho');
-      container.insertBefore(novoItem, btnAdd);
-      contadorEdit++;
-    }
-
-    // Abrir modal de editar tamanhos
-    document.addEventListener('click', async function(e) {
-      console.log('Click detectado em:', e.target);
-      
-      if (e.target.closest('.btn-editar-tamanhos')) {
-        console.log('Botão tamanhos clicado!');
-        const pratoId = e.target.closest('.btn-editar-tamanhos').dataset.id;
-        console.log('Prato ID:', pratoId);
-        document.getElementById('editPratoId').value = pratoId;
-        
-        // Carregar tamanhos existentes
-        try {
-          const response = await fetch(`/menu/${pratoId}/tamanhos`);
-          const tamanhos = await response.json();
-          
-          const container = document.getElementById('tamanhosEditList');
-          container.innerHTML = '<button type="button" class="btn-add-tamanho" onclick="adicionarTamanhoEdit()"><i class="fas fa-plus"></i> Adicionar Tamanho</button>';
-          
-          contadorEdit = 0;
-          tamanhos.forEach((tamanho, index) => {
-            const item = document.createElement('div');
-            item.className = 'tamanho-preco-item';
-            item.innerHTML = `
-              <select name="tamanhos[${index}][tamanho]" required>
-                <option value="">Tamanho...</option>
-                <option value="P" ${tamanho.tamanho === 'P' ? 'selected' : ''}>Pequeno (P)</option>
-                <option value="M" ${tamanho.tamanho === 'M' ? 'selected' : ''}>Médio (M)</option>
-                <option value="G" ${tamanho.tamanho === 'G' ? 'selected' : ''}>Grande (G)</option>
-                <option value="GG" ${tamanho.tamanho === 'GG' ? 'selected' : ''}>Gigante (GG)</option>
-              </select>
-              <input type="number" step="0.01" name="tamanhos[${index}][preco]" value="${tamanho.preco}" required />
-              <input type="hidden" name="tamanhos[${index}][id]" value="${tamanho.id || ''}" />
-              <button type="button" class="btn-remove-tamanho" onclick="removerTamanho(this)">
-                <i class="fas fa-trash"></i>
-              </button>
-            `;
-            
-            const btnAdd = container.querySelector('.btn-add-tamanho');
-            container.insertBefore(item, btnAdd);
-            contadorEdit++;
-          });
-          const modal = document.getElementById('modalTamanhos');
-          console.log('Modal encontrado:', modal);
-          if (modal) {
-            modal.style.display = 'block';
-            console.log('Modal deve estar visível agora');
-          } else {
-            console.error('Modal não encontrado!');
-          }
-        } catch (error) {
-          console.error('Erro ao carregar tamanhos:', error);
-        }
-      }
-    });
-
-    // Salvar tamanhos editados
-    document.getElementById('formTamanhos').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const pratoId = document.getElementById('editPratoId').value;
-      const formData = new FormData(this);
-      
-      // Converter FormData para URLSearchParams para enviar como application/x-www-form-urlencoded
-      const urlParams = new URLSearchParams();
-      for (let [key, value] of formData) {
-        urlParams.append(key, value);
-      }
-      
-      console.log('Enviando dados:', urlParams.toString());
-      
-      try {
-        const response = await fetch(`/menu/${pratoId}/tamanhos`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: urlParams.toString()
-        });
-        
-        if (response.ok) {
-          location.reload(); // Recarregar página para mostrar alterações
-        } else {
-          const errorText = await response.text();
-          console.error('Erro do servidor:', errorText);
-          alert('Erro ao salvar tamanhos');
-        }
-      } catch (error) {
-        console.error('Erro ao salvar tamanhos:', error);
-        alert('Erro ao salvar tamanhos');
-      }
-    });
-
-    function fecharModalTamanhos() {
-      document.getElementById('modalTamanhos').style.display = 'none';
-    }
-
-    document.getElementById('fecharModalTamanhos').onclick = fecharModalTamanhos;
+    // Funcionalidade de edição de tamanhos removida
 
     // Resto do código JavaScript existente...
     document.querySelectorAll('.form-excluir').forEach(form => {
@@ -208,9 +94,6 @@ document.addEventListener('DOMContentLoaded', function() {
     window.onclick = (event) => {
       if (event.target == modalCategoria) modalCategoria.style.display = "none";
       if (event.target == modalPedido) modalPedido.style.display = "none";
-      if (event.target == document.getElementById('modalTamanhos')) {
-        document.getElementById('modalTamanhos').style.display = "none";
-      }
     };
 
     document.getElementById("btnAvancar").onclick = () => {

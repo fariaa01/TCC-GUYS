@@ -1,26 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
+const upload = require('../../middlewares/upload');
 
 const ensureAuth = require('../../middlewares/ensureAuth');
 const menuController = require('../../../controllers/vendas/menuController');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'public/uploads/'),
-  filename: (req, file, cb) =>
-    cb(null, Date.now() + path.extname(file.originalname).toLowerCase())
-});
-const upload = multer({
-  storage,
-  limits: { fileSize: 2 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowed = ['.png', '.jpg', '.jpeg', '.webp'];
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (!allowed.includes(ext)) return cb(new Error('Formato de imagem inválido.'));
-    cb(null, true);
-  }
-});
+// O middleware de upload já aplica limites e validação centralizados se necessário.
 
 router.use(ensureAuth);
 

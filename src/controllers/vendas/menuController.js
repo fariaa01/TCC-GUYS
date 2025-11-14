@@ -19,28 +19,48 @@ module.exports = {
   
   criarPrato: async (req, res) => {
     try {
+      console.log('Debug criarPrato - body:', req.body);
+      console.log('Debug criarPrato - file:', req.file);
       const usuarioId = req.session.userId;
       const { categoria, nome_prato, ingredientes, quantidade, preco, tamanhos } = req.body;
-      
+
+      // Processar tamanhos enviados via FormData (formato: tamanhos[0][tamanho], tamanhos[0][preco])
+      let tamanhosArray = [];
+      if (Array.isArray(tamanhos) && tamanhos.length > 0) {
+        tamanhosArray = tamanhos
+          .filter(t => t && t.tamanho && t.preco)
+          .map(t => ({ tamanho: t.tamanho, preco: parseFloat(t.preco) }));
+      } else {
+        const keys = Object.keys(req.body || {});
+        const tamanhosMap = {};
+        keys.forEach(key => {
+          const match = key.match(/^tamanhos\[(\d+)\]\[(tamanho|preco)\]$/);
+          if (match) {
+            const index = match[1];
+            const field = match[2];
+            if (!tamanhosMap[index]) tamanhosMap[index] = {};
+            tamanhosMap[index][field] = req.body[key];
+          }
+        });
+
+        tamanhosArray = Object.keys(tamanhosMap)
+          .map(i => tamanhosMap[i])
+          .filter(t => t.tamanho && t.preco)
+          .map(t => ({ tamanho: t.tamanho, preco: parseFloat(t.preco) }));
+      }
+
       // Validar se tem preço único OU múltiplos tamanhos
       const temPrecoUnico = preco !== undefined && preco !== '';
-      const temTamanhos = tamanhos && Array.isArray(tamanhos) && tamanhos.length > 0;
-      
-      if (!nome_prato) {
-        return res.status(400).send('Nome do prato é obrigatório.');
-      }
-      
-      if (!temPrecoUnico && !temTamanhos) {
-        return res.status(400).send('Informe um preço único ou múltiplos tamanhos com preços.');
-      }
+      const temTamanhos = tamanhosArray && tamanhosArray.length > 0;
+
+      if (!nome_prato) return res.status(400).send('Nome do prato é obrigatório.');
+      if (!temPrecoUnico && !temTamanhos) return res.status(400).send('Informe um preço único ou múltiplos tamanhos com preços.');
 
       // Processar preço único se fornecido
       let precoNum = null;
       if (temPrecoUnico && !temTamanhos) {
         precoNum = Number(String(preco).replace(',', '.'));
-        if (Number.isNaN(precoNum) || precoNum < 0) {
-          return res.status(400).send('Preço inválido.');
-        }
+        if (Number.isNaN(precoNum) || precoNum < 0) return res.status(400).send('Preço inválido.');
       }
 
       const dadosPrato = {
@@ -48,7 +68,9 @@ module.exports = {
         nome_prato,
         ingredientes,
         quantidade: quantidade || null,
-        preco: temTamanhos ? null : precoNum, // Se tem tamanhos, preço = null
+        // Muitos bancos bloqueiam NULL em colunas NOT NULL; quando há tamanhos,
+        // gravamos 0.00 no campo `preco` e os valores reais ficam em `prato_tamanhos`.
+        preco: temTamanhos ? 0 : precoNum,
         usuario_id: usuarioId,
         destaque: req.body.destaque ? 1 : 0,
         is_disponivel: req.body.is_disponivel ? 1 : 0,
@@ -60,48 +82,9 @@ module.exports = {
       
       const pratoId = await Menu.create(dadosPrato);
 
-      // Salvar múltiplos tamanhos se fornecidos
-      if (temTamanhos) {
-        let tamanhosArray = [];
-
-        // Se tamanhos é array (JSON), usar diretamente
-        if (Array.isArray(tamanhos)) {
-          tamanhosArray = tamanhos
-            .filter(t => t.tamanho && t.preco)
-            .map(t => ({
-              tamanho: t.tamanho,
-              preco: parseFloat(t.preco)
-            }));
-        } else {
-          // Se tamanhos vem do FormData (formato: tamanhos[0][tamanho])
-          const keys = Object.keys(req.body);
-          const tamanhosMap = {};
-
-          keys.forEach(key => {
-            const match = key.match(/^tamanhos\[(\d+)\]\[(tamanho|preco)\]$/);
-            if (match) {
-              const index = match[1];
-              const field = match[2];
-              
-              if (!tamanhosMap[index]) {
-                tamanhosMap[index] = {};
-              }
-              tamanhosMap[index][field] = req.body[key];
-            }
-          });
-
-          tamanhosArray = Object.keys(tamanhosMap)
-            .map(index => tamanhosMap[index])
-            .filter(t => t.tamanho && t.preco)
-            .map(t => ({
-              tamanho: t.tamanho,
-              preco: parseFloat(t.preco)
-            }));
-        }
-        
-        if (tamanhosArray.length > 0) {
-          await Menu.criarTamanhos(pratoId, tamanhosArray);
-        }
+      // Salvar múltiplos tamanhos se fornecidos (usando tamanhosArray já processado)
+      if (temTamanhos && tamanhosArray.length > 0) {
+        await Menu.criarTamanhos(pratoId, tamanhosArray);
       }
 
       res.redirect('/menu');
