@@ -56,7 +56,20 @@ module.exports = {
 
       let totalFixosMes = 0;
 
-      for (const g of listaFixos) {
+      // Classificar gastos fixos por categoria
+      const gastosFixosComCategoria = listaFixos.map(g => {
+        let categoria = 'Outros';
+        const nomeGasto = (g.nome || '').toLowerCase();
+        
+        if (nomeGasto.includes('salário')) categoria = 'Funcionário';
+        else if (nomeGasto.includes('aluguel')) categoria = 'Aluguel';
+        else if (nomeGasto.includes('internet') || nomeGasto.includes('telefone') || nomeGasto.includes('água') || nomeGasto.includes('luz') || nomeGasto.includes('energia')) categoria = 'Utilidades';
+        else if (nomeGasto.includes('fornecedor') || nomeGasto.includes('matéria')) categoria = 'Fornecedor';
+        
+        return { ...g, categoria };
+      });
+
+      for (const g of gastosFixosComCategoria) {
         const inicioFixo = g.data_inicio ? new Date(g.data_inicio) : null;
         const fimFixo = g.data_fim ? new Date(g.data_fim) : null;
 
@@ -85,16 +98,33 @@ module.exports = {
 
       const saldoComFixosMes = saldoFinalMes - totalFixosMes;
 
+      // Paginação para gastos fixos
+      const pageFixos = parseInt(req.query.pageFixos) || 1;
+      const limitFixos = parseInt(req.query.limitFixos) || 10;
+      const offsetFixos = (pageFixos - 1) * limitFixos;
+      const totalFixosRegistros = gastosFixosComCategoria.length;
+      const totalPaginasFixos = Math.ceil(totalFixosRegistros / limitFixos);
+      const gastosFixosPaginados = gastosFixosComCategoria.slice(offsetFixos, offsetFixos + limitFixos);
+
       return res.render('sistema/financeiro', {
         dados: todosLancamentos,
         totalEntradas: totalEntradasMes.toFixed(2),
         totalSaidas: totalSaidasMes.toFixed(2),
         saldoFinal: saldoFinalMes.toFixed(2),
-        gastosFixos: listaFixos,
+        gastosFixos: gastosFixosPaginados,
+        todosGastosFixos: gastosFixosComCategoria,
         totalFixos: totalFixosMes.toFixed(2),
         saldoComFixos: saldoComFixosMes.toFixed(2),
         ano: anoEscolhido,
-        mes: mesEscolhido
+        mes: mesEscolhido,
+        paginacaoFixos: {
+          currentPage: pageFixos,
+          totalPages: totalPaginasFixos,
+          totalRecords: totalFixosRegistros,
+          limit: limitFixos,
+          hasNext: pageFixos < totalPaginasFixos,
+          hasPrev: pageFixos > 1
+        }
       });
     } catch (err) {
       console.error('Erro ao listar financeiro:', err);

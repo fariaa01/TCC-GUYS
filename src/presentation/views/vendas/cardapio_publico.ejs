@@ -95,15 +95,6 @@
                     <% } else { %>
                       <strong class="preco">R$ <%= Number(i.preco).toFixed(2).replace('.', ',') %></strong>
                       <button
-                        type="button"
-                        class="btn adicionar-carrinho"
-                        data-produto-id="<%= i.id %>"
-                        data-id="<%= i.id %>"
-                        data-preco="<%= Number(i.preco) %>"
-                        data-nome="<%= i.nome_prato %>"
-                        data-img="<%= i.imagem ? ('/uploads/' + i.imagem) : '' %>"
-                        data-endpoint-adicionar="/carrinho/adicionar"
-                        aria-label="Adicionar <%= i.nome_prato %> ao carrinho">
                         Adicionar
                       </button>
                     <% } %>
@@ -158,8 +149,7 @@
 
     <div class="cart-backdrop" id="cartBackdrop"></div>
   </div>
-
-  <!-- ========== MODAL LOGIN/CADASTRO DE CLIENTE ========== -->
+]
   <div id="authModal" class="auth-modal" aria-hidden="true">
     <div class="auth-backdrop" data-close-auth></div>
     <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authTitle">

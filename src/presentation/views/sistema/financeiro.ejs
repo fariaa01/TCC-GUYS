@@ -177,11 +177,49 @@
         <p class="subtitle">Despesas recorrentes que impactam seu saldo final.</p>
       </div>
       <div class="head-actions">
-        <input id="buscaFixos" class="input" type="text" placeholder="Buscar por nome ou recorrência..." />
         <button class="btn btn--primary" id="btnNovoGastoFixo">
           <i class="fas fa-plus-circle"></i>
           Adicionar Gasto Fixo
         </button>
+      </div>
+    </section>
+
+    <%
+      const todasCategoriasFixos = Array.from(new Set((todosGastosFixos || []).map(f => f?.categoria).filter(Boolean))).sort();
+    %>
+    <section class="filter-bar">
+      <div class="filter-line">
+        <div class="filter-item grow">
+          <label for="buscaFixos">Buscar</label>
+          <div class="input-icon">
+            <i class="fas fa-magnifying-glass search-icon"></i>
+            <input id="buscaFixos" type="text" placeholder="Buscar por nome ou recorrência..." />
+          </div>
+        </div>
+
+        <div class="filter-item">
+          <label for="filtroCategoriaFixos">Categoria</label>
+          <select id="filtroCategoriaFixos">
+            <option value="">Todas</option>
+            <% todasCategoriasFixos.forEach(c => { %>
+              <option value="<%= c %>"><%= c %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label for="filtroRecorrencia">Recorrência</label>
+          <select id="filtroRecorrencia">
+            <option value="">Todas</option>
+            <option value="mensal">Mensal</option>
+            <option value="semanal">Semanal</option>
+            <option value="anual">Anual</option>
+          </select>
+        </div>
+
+        <div class="filter-item actions">
+          <button class="btn btn--ghost" id="btnLimparFiltrosFixos">Limpar</button>
+        </div>
       </div>
     </section>
 
@@ -191,6 +229,7 @@
           <thead>
             <tr>
               <th class="sticky">Nome</th>
+              <th class="sticky">Categoria</th>
               <th class="sticky">Valor</th>
               <th class="sticky">Recorrência</th>
               <th class="sticky">Início</th>
@@ -206,8 +245,13 @@
                  const diFmt = isNaN(di) ? String(f.data_inicio).slice(0,10) : di.toLocaleDateString('pt-BR');
                  const dfFmt = df && !isNaN(df) ? df.toLocaleDateString('pt-BR') : (f.data_fim ? String(f.data_fim).slice(0,10) : '-');
             %>
-              <tr>
+              <tr data-categoria-fixo="<%= f.categoria %>" data-recorrencia="<%= f.recorrencia %>" data-nome="<%= f.nome.toLowerCase() %>">
                 <td data-col="nome"><%= f.nome %></td>
+                <td data-col="categoria">
+                  <span class="badge <%= f.categoria === 'Funcionário' ? 'info' : 'default' %>">
+                    <%= f.categoria %>
+                  </span>
+                </td>
                 <td data-col="valor">R$ <%= Number(f.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
                 <td data-col="recorrencia" class="cap"><%= f.recorrencia %></td>
                 <td data-col="inicio"><%= diFmt %></td>
@@ -221,7 +265,7 @@
             <% }) %>
           <% } else { %>
             <tr class="empty-row">
-              <td colspan="6">
+              <td colspan="7">
                 <div class="empty">
                   <i class="fa-regular fa-folder-open"></i>
                   <p>Nenhum gasto fixo cadastrado.</p>
@@ -233,6 +277,27 @@
           </tbody>
         </table>
       </div>
+
+      <% if (paginacaoFixos && paginacaoFixos.totalPages > 1) { %>
+        <div class="pagination">
+          <% if (paginacaoFixos.hasPrev) { %>
+            <a href="?ano=<%= ano %>&mes=<%= mes %>&pageFixos=<%= paginacaoFixos.currentPage - 1 %>&limitFixos=<%= paginacaoFixos.limit %>" class="btn btn--ghost">
+              <i class="fas fa-chevron-left"></i> Anterior
+            </a>
+          <% } %>
+          
+          <span class="pagination-info">
+            Página <%= paginacaoFixos.currentPage %> de <%= paginacaoFixos.totalPages %>
+            (<%= paginacaoFixos.totalRecords %> registros)
+          </span>
+          
+          <% if (paginacaoFixos.hasNext) { %>
+            <a href="?ano=<%= ano %>&mes=<%= mes %>&pageFixos=<%= paginacaoFixos.currentPage + 1 %>&limitFixos=<%= paginacaoFixos.limit %>" class="btn btn--ghost">
+              Próxima <i class="fas fa-chevron-right"></i>
+            </a>
+          <% } %>
+        </div>
+      <% } %>
     </section>
   </div>
 

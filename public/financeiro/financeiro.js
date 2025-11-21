@@ -191,25 +191,73 @@
       if (e.target === modalFixo) fecharFixo();
     });
 
+    // Filtros para Gastos Fixos
     var inpBuscaFixos = document.getElementById('buscaFixos');
-    if (inpBuscaFixos) {
-      inpBuscaFixos.addEventListener('input', function () {
-        var q = (inpBuscaFixos.value || '').toLowerCase().trim();
-        var corpo = document.querySelector('#tabelaFixos tbody');
-        if (!corpo) return;
-        var linhas = corpo.querySelectorAll('tr');
-        for (var i = 0; i < linhas.length; i++) {
-          var row = linhas[i];
-          if (row.classList.contains('empty-row')) continue;
-          var cols = row.querySelectorAll('[data-col="nome"], [data-col="recorrencia"]');
-          var txt = '';
-          for (var c = 0; c < cols.length; c++) {
-            txt += ' ' + (cols[c].textContent || '').toLowerCase();
+    var selCatFixos = document.getElementById('filtroCategoriaFixos');
+    var selRecorrencia = document.getElementById('filtroRecorrencia');
+    var btnLimparFixos = document.getElementById('btnLimparFiltrosFixos');
+
+    function aplicarFiltrosFixos() {
+      var q = valorInput(inpBuscaFixos).toLowerCase().trim();
+      var cat = valorInput(selCatFixos);
+      var rec = valorInput(selRecorrencia);
+
+      var visiveis = 0;
+      var corpo = document.querySelector('#tabelaFixos tbody');
+      if (!corpo) return;
+      
+      var linhas = corpo.querySelectorAll('tr');
+      
+      for (var i = 0; i < linhas.length; i++) {
+        var row = linhas[i];
+        if (row.classList.contains('empty-row')) continue;
+
+        var rowNome = row.getAttribute('data-nome') || '';
+        var rowCat = row.getAttribute('data-categoria-fixo') || '';
+        var rowRec = row.getAttribute('data-recorrencia') || '';
+
+        var okBusca = !q || rowNome.indexOf(q) > -1 || rowRec.indexOf(q) > -1;
+        var okCat = !cat || rowCat === cat;
+        var okRec = !rec || rowRec === rec;
+
+        var mostrar = okBusca && okCat && okRec;
+        row.style.display = mostrar ? '' : 'none';
+        if (mostrar) visiveis++;
+      }
+
+      var emptyId = 'empty-after-filter-fixos';
+      var existente = document.getElementById(emptyId);
+      if (visiveis === 0) {
+        if (!existente && corpo) {
+          var nova = document.createElement('tr');
+          nova.id = emptyId;
+          nova.innerHTML = '<td colspan="7"><div class="empty small">' +
+            '<i class="fa-regular fa-folder-open"></i>' +
+            '<p>Nenhum gasto fixo encontrado com os filtros aplicados.</p>' +
+            '<button class="btn btn--ghost" id="btnLimparFixos2">Limpar filtros</button>' +
+          '</div></td>';
+          corpo.appendChild(nova);
+          var btnLimparFixos2 = document.getElementById('btnLimparFixos2');
+          if (btnLimparFixos2) {
+            btnLimparFixos2.addEventListener('click', limparFiltrosFixos);
           }
-          row.style.display = txt.indexOf(q) > -1 ? '' : 'none';
         }
-      });
+      } else {
+        if (existente) existente.remove();
+      }
     }
+
+    function limparFiltrosFixos() {
+      if (inpBuscaFixos) inpBuscaFixos.value = '';
+      if (selCatFixos) selCatFixos.value = '';
+      if (selRecorrencia) selRecorrencia.value = '';
+      aplicarFiltrosFixos();
+    }
+
+    if (inpBuscaFixos) inpBuscaFixos.addEventListener('input', aplicarFiltrosFixos);
+    if (selCatFixos) selCatFixos.addEventListener('change', aplicarFiltrosFixos);
+    if (selRecorrencia) selRecorrencia.addEventListener('change', aplicarFiltrosFixos);
+    if (btnLimparFixos) btnLimparFixos.addEventListener('click', limparFiltrosFixos);
   });
 
   window.confirmarExclusaoLancamento = function (id) {

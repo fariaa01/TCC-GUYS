@@ -16,12 +16,21 @@ function limparValorMonetario(valor) {
   if (typeof valor === 'number') return valor;
   
   if (typeof valor === 'string') {
-    const valorLimpo = valor
-      .replace(/R\$\s*/g, '')
-      .replace(/\s/g, '')
-      .replace(/\./g, '') 
-      .replace(/,/g, '.'); 
+    let valorLimpo = valor.replace(/R\$\s*/g, '').replace(/\s/g, '');
     
+    const temVirgula = valorLimpo.includes(',');
+    const temPonto = valorLimpo.includes('.');
+    
+    if (temVirgula) {
+      valorLimpo = valorLimpo.replace(/\./g, '').replace(/,/g, '.');
+    } else if (temPonto) {
+      const partes = valorLimpo.split('.');
+      if (partes.length === 2 && partes[1].length <= 2) {
+        valorLimpo = valorLimpo;
+      } else {
+        valorLimpo = valorLimpo.replace(/\./g, '');
+      }
+    }
     const numeroLimpo = parseFloat(valorLimpo) || 0;
     return numeroLimpo;
   }
@@ -75,11 +84,13 @@ module.exports = {
         dados.foto = req.file.filename;
       }
 
+      // Limpar o salário ANTES de salvar no banco
+      const salarioLimpo = limparValorMonetario(dados.salario);
+      dados.salario = salarioLimpo;
+
       await Funcionario.create(dados, userId);
 
-      const salarioLimpo = limparValorMonetario(dados.salario);
       if (salarioLimpo > 0) {
-        dados.salario = salarioLimpo;
         const existente = await findGastoFixoSalarioByNome(dados.nome, userId);
         if (!existente) {
           await GastosFixos.create(
@@ -118,10 +129,15 @@ module.exports = {
         dados.foto = req.file.filename;
       }
       
+      // Limpar o salário ANTES de atualizar no banco
+      if (dados.salario !== undefined) {
+        dados.salario = limparValorMonetario(dados.salario);
+      }
+      
       await Funcionario.update(id, dados, userId);
 
       const nomeNovo = req.body.nome || (antes && antes.nome);
-      const salarioNovo = req.body.salario !== undefined ? limparValorMonetario(req.body.salario) : (antes ? limparValorMonetario(antes.salario) : 0);
+      const salarioNovo = dados.salario !== undefined ? dados.salario : (antes ? parseFloat(antes.salario) : 0);
 
       if (nomeNovo) {
         const fixos = await GastosFixos.getAll(userId);
