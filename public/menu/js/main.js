@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 Inicializando Sistema de Gestão de Cardápio...');
   
   try {
-    // Verificar se as funções dos módulos estão disponíveis
     if (typeof initTamanhos === 'function') {
       initTamanhos();
     } else {
@@ -49,13 +48,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// ============================================
-// FUNÇÕES UTILITÁRIAS GLOBAIS
-// ============================================
-
-/**
- * Exibe mensagem de sucesso
- */
 window.mostrarSucesso = function(titulo, texto, tempo = 2000) {
   Swal.fire({
     icon: 'success',
@@ -66,9 +58,6 @@ window.mostrarSucesso = function(titulo, texto, tempo = 2000) {
   });
 };
 
-/**
- * Exibe mensagem de erro
- */
 window.mostrarErro = function(titulo, texto) {
   Swal.fire({
     icon: 'error',

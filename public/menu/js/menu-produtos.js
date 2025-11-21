@@ -232,10 +232,8 @@ function initProdutos() {
 
 }
 
-// Funções para editar produto
 async function abrirModalEditarProduto(produtoId) {
   try {
-    // Buscar dados do produto
     const response = await fetch(`/menu/${produtoId}`);
     const result = await response.json();
     
@@ -245,13 +243,11 @@ async function abrirModalEditarProduto(produtoId) {
     
     const produto = result.produto;
     
-    // Preencher o modal com os dados
     document.getElementById('editarProdutoId').value = produto.id;
     document.getElementById('editarNome').value = produto.nome_prato || produto.pedido || produto.nome || '';
     document.getElementById('editarCategoria').value = produto.categoria || '';
     document.getElementById('editarDescricao').value = produto.ingredientes || produto.descricao || '';
-    
-    // Configurar preço e tamanhos
+
     const temTamanhos = produto.tamanhos && produto.tamanhos.length > 0;
     const temPrecoUnico = produto.preco && Number(produto.preco) > 0 && !temTamanhos;
     
@@ -264,16 +260,12 @@ async function abrirModalEditarProduto(produtoId) {
       document.getElementById('editarPreco').value = '';
       document.getElementById('editarPrecoUnico').style.display = 'none';
       document.getElementById('editarMultiplosPrecosList').style.display = 'block';
-      
-      // Carregar tamanhos existentes
+
       carregarTamanhosParaEdicao(produto.tamanhos || []);
     }
-    
-    // Configurar checkboxes
     document.getElementById('editarDestaque').checked = produto.destaque == 1;
     document.getElementById('editarDisponivel').checked = produto.is_disponivel == 1;
-    
-    // Mostrar imagem atual se existir
+
     const imagemAtual = document.getElementById('editarImagemAtual');
     const imagemPreview = document.getElementById('editarImagemPreview');
     
@@ -283,8 +275,7 @@ async function abrirModalEditarProduto(produtoId) {
     } else {
       imagemAtual.style.display = 'none';
     }
-    
-    // Abrir modal
+
     document.getElementById('modalEditarProduto').style.display = 'flex';
     
   } catch (error) {
@@ -301,7 +292,6 @@ function fecharModalEditarProduto() {
   document.getElementById('modalEditarProduto').style.display = 'none';
 }
 
-// Event listener para o formulário de edição
 document.addEventListener('DOMContentLoaded', function() {
   const formEditarProduto = document.getElementById('formEditarProduto');
   if (formEditarProduto) {
@@ -310,12 +300,10 @@ document.addEventListener('DOMContentLoaded', function() {
       
       const produtoId = document.getElementById('editarProdutoId').value;
       const formData = new FormData(this);
-      
-      // Se tem múltiplos preços, também salvar tamanhos separadamente
+
       const temMultiplosPrecos = document.getElementById('editarMultiplosPrecos').checked;
       
       try {
-        // Primeiro, atualizar o produto
         const response = await fetch(`/menu/${produtoId}`, {
           method: 'PUT',
           body: formData
@@ -326,8 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!result.ok) {
           throw new Error(result.msg || 'Erro ao atualizar produto');
         }
-        
-        // Se tem múltiplos preços, salvar tamanhos separadamente
+
         if (temMultiplosPrecos) {
           const tamanhos = [];
           const tamanhoInputs = document.querySelectorAll('#editarTamanhosLista .tamanho-item-card');
@@ -340,8 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
               tamanhos.push({ tamanho, preco: parseFloat(preco) });
             }
           });
-          
-          // Salvar tamanhos
+
           const tamanhosResponse = await fetch(`/menu/${produtoId}/tamanhos`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -378,7 +364,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Funções para gerenciar tamanhos na edição
 let contadorEdicaoTamanhos = 0;
 
 function carregarTamanhosParaEdicao(tamanhos) {
@@ -457,7 +442,6 @@ function removerTamanhoEdicao(btn) {
   }
 }
 
-// Event listener para o checkbox de múltiplos preços na edição
 document.addEventListener('DOMContentLoaded', function() {
   const editarMultiplosPrecos = document.getElementById('editarMultiplosPrecos');
   if (editarMultiplosPrecos) {
