@@ -167,52 +167,6 @@ console.log("cardapio.js carregado ✔️");
 
 })();
 
-// =============================================================
-// ========================= FILTROS ============================
-// =============================================================
-const chips = $$('.chip');
-const verTudo = $('#btnVerTudo');
-const cards = $$('.cards .card');
-const searchInput = $('#searchMenu');
-const searchClear = $('.search-clear');
-const selectCategory = $('#selectCategory');
-
-function aplicarFiltro(cat) {
-  if (searchInput) searchInput.value = '';
-
-  cards.forEach((card) => {
-    const c = (card.getAttribute('data-cat') || 'outros').toLowerCase();
-    card.style.display = (cat === 'todos' || c === cat.toLowerCase()) ? '' : 'none';
-  });
-}
-
-function aplicarBusca(query) {
-  const q = (query || '').trim().toLowerCase();
-  cards.forEach((card) => {
-    const title = (card.querySelector('.titulo')?.textContent || '').toLowerCase();
-    const cat = (card.getAttribute('data-cat') || '').toLowerCase();
-    card.style.display = (q === '' || title.includes(q) || cat.includes(q)) ? '' : 'none';
-  });
-}
-
-chips.forEach((chip) => {
-  chip.addEventListener('click', () => {
-    chips.forEach((c) => c.classList.remove('chip--active'));
-    chip.classList.add('chip--active');
-    if (selectCategory) selectCategory.value = 'todos';
-    aplicarFiltro(chip.textContent.trim());
-  });
-});
-
-verTudo?.addEventListener('click', () => {
-  chips.forEach((c) => c.classList.remove('chip--active'));
-  if (selectCategory) selectCategory.value = 'todos';
-  aplicarFiltro('todos');
-});
-
-searchInput?.addEventListener('input', (e) => aplicarBusca(e.target.value));
-searchClear?.addEventListener('click', () => { searchInput.value = ''; aplicarBusca(''); searchInput.focus(); });
-selectCategory?.addEventListener('change', (e) => { aplicarFiltro(e.target.value || 'todos'); });
 
 // =============================================================
 // ====================== CARRINHO LATERAL =======================
@@ -336,5 +290,42 @@ document.querySelectorAll(".ver-item").forEach(btn => {
   });
 });
 
-// =============== PRIMEIRO RENDER ===============
+
 renderCart();
+
+// =============================================================
+// ===================== BUSCA DO CARDÁPIO ======================
+// =============================================================
+
+// usa os elementos já presentes no HTML
+const searchInput = $("#searchMenu");
+const searchClear = $(".search-clear");
+
+// função de busca
+function buscarItens() {
+  const termo = searchInput.value.toLowerCase().trim();
+  const cards = document.querySelectorAll(".card");
+
+  cards.forEach(card => {
+    const titulo = card.querySelector(".titulo")?.textContent.toLowerCase() || "";
+    const desc = card.querySelector(".desc")?.textContent.toLowerCase() || "";
+    const categoria = card.getAttribute("data-cat")?.toLowerCase() || "";
+
+    const match =
+      titulo.includes(termo) ||
+      desc.includes(termo) ||
+      categoria.includes(termo);
+
+    card.style.display = match ? "" : "none";
+  });
+}
+
+// ativar busca ao digitar
+searchInput?.addEventListener("input", buscarItens);
+
+// limpar busca
+searchClear?.addEventListener("click", () => {
+  searchInput.value = "";
+  buscarItens();
+  searchInput.focus();
+});
