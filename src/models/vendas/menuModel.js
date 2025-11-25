@@ -80,16 +80,79 @@ module.exports = {
   },
 
   getPublicByUsuario: async (usuarioId) => {
-    const [rows] = await db.query(
-      `SELECT id, nome_prato, preco, descricao, imagem, destaque
+    try {
+      console.log('menuModel.getPublicByUsuario - usuarioId:', usuarioId);
+      const [rows] = await db.query(`
+        SELECT m.id,
+               m.nome_prato,
+               m.preco,
+               m.descricao,
+               m.imagem,
+               m.destaque,
+               m.categoria,
+               COALESCE(m.is_disponivel, 1) AS is_disponivel,
+               JSON_ARRAYAGG(
+                 CASE WHEN pt.id IS NOT NULL
+                 THEN JSON_OBJECT('id', pt.id, 'tamanho', pt.tamanho, 'preco', pt.preco)
+                 ELSE NULL END
+               ) AS tamanhos_json
+        FROM menu m
+        LEFT JOIN prato_tamanhos pt ON m.id = pt.prato_id
+        WHERE m.usuario_id = ?
+          AND COALESCE(m.arquivado, 0) = 0
+          AND COALESCE(m.is_disponivel, 1) = 1
+        GROUP BY m.id
+        ORDER BY m.destaque DESC, m.nome_prato ASC
+      `, [usuarioId]);
+
+      // Diagnostic: inspect tamanhos_json type
+      try {
+        // rows may contain tamanhos_json as string (JSON) or as JS array depending on driver/version
+        return rows.map(prato => {
+          const tj = prato.tamanhos_json;
+          if (tj && typeof tj === 'string') {
+            try { prato.tamanhos_json = JSON.parse(tj); } catch (e) { prato.tamanhos_json = null; }
+          }
+          return {
+            ...prato,
+            tamanhos: prato.tamanhos_json && Array.isArray(prato.tamanhos_json)
+              ? prato.tamanhos_json.filter(t => t !== null)
+              : []
+          };
+        });
+      } catch (mapErr) {
+        console.error('menuModel.getPublicByUsuario - erro ao mapear rows:', mapErr);
+        throw mapErr;
+      }
+    } catch (err) {
+      console.error('menuModel.getPublicByUsuario - query com JSON falhou, tentando fallback. Erro:', err && err.message);
+      const [pratos] = await db.query(
+        `SELECT id, nome_prato, preco, descricao, imagem, destaque, categoria, COALESCE(is_disponivel,1) AS is_disponivel
          FROM menu
-        WHERE usuario_id = ?
-          AND COALESCE(arquivado, 0) = 0
-          AND COALESCE(is_disponivel, 1) = 1
-        ORDER BY destaque DESC, nome_prato ASC`,
-      [usuarioId]
-    );
-    return rows;
+         WHERE usuario_id = ?
+           AND COALESCE(arquivado, 0) = 0
+           AND COALESCE(is_disponivel, 1) = 1
+         ORDER BY destaque DESC, nome_prato ASC`,
+        [usuarioId]
+      );
+
+      if (!pratos || pratos.length === 0) return [];
+
+      const ids = pratos.map(p => p.id);
+      const placeholders = ids.map(() => '?').join(',');
+      const [tamanhosRows] = await db.query(
+        `SELECT id, prato_id, tamanho, preco FROM prato_tamanhos WHERE prato_id IN (${placeholders}) ORDER BY prato_id, tamanho`,
+        ids
+      );
+
+      const tamanhosMap = {};
+      for (const t of tamanhosRows) {
+        if (!tamanhosMap[t.prato_id]) tamanhosMap[t.prato_id] = [];
+        tamanhosMap[t.prato_id].push({ id: t.id, tamanho: t.tamanho, preco: t.preco });
+      }
+
+      return pratos.map(p => ({ ...p, tamanhos: tamanhosMap[p.id] || [] }));
+    }
   },
 
   async criarTamanhos(pratoId, tamanhosPrecos) {

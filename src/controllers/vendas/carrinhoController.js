@@ -23,7 +23,12 @@ module.exports = {
   },
 
   adicionarItem: async (req, res) => {
-    const clienteId = req.session.clienteId;
+    const clienteId = req.session && req.session.clienteId;
+    console.log('Debug adicionarItem - clienteId:', clienteId, 'body:', req.body);
+
+    if (!clienteId) {
+      return res.status(401).json({ authRequired: true, mensagem: 'É necessário fazer login para adicionar ao carrinho.' });
+    }
     let { produto_id, quantidade = 1, preco } = req.body;
 
     produto_id = Number(produto_id);
@@ -33,13 +38,23 @@ module.exports = {
       return res.status(400).json({ error: 'Dados inválidos' });
     }
 
+    // sanity: ensure Carrinho model has expected functions
+    if (!Carrinho || typeof Carrinho.obterOuCriarRascunhoId !== 'function') {
+      console.error('Carrinho model não disponível ou inválido:', typeof Carrinho);
+      return res.status(500).json({ error: 'Erro interno: módulo de carrinho indisponível' });
+    }
+
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
 
+      console.log('adicionarItem: criando/obtendo rascunho para clienteId', clienteId);
       const pedidoId = await Carrinho.obterOuCriarRascunhoId(clienteId, conn);
+      console.log('adicionarItem: pedidoId obtido', pedidoId);
 
+      console.log('adicionarItem: consultando preco do produto', produto_id);
       let precoUnit = await Carrinho.precoProduto(produto_id, conn);
+      console.log('adicionarItem: precoUnit', precoUnit);
 
       if ((precoUnit == null || !Number.isFinite(precoUnit)) && Number.isFinite(Number(preco)) && Number(preco) > 0) {
         precoUnit = Number(preco);
@@ -51,6 +66,7 @@ module.exports = {
       }
 
       const existente = await Carrinho.buscarItemDoPedido(pedidoId, produto_id, conn);
+      console.log('adicionarItem: item existente?', !!existente, existente && existente.id);
       if (existente) {
         await Carrinho.aumentarQuantidadeItem(existente.id, quantidade, precoUnit, conn);
       } else {
