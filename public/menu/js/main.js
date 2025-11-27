@@ -66,9 +66,7 @@ window.mostrarErro = function(titulo, texto) {
   });
 };
 
-/**
- * Exibe mensagem de aviso
- */
+
 window.mostrarAviso = function(titulo, texto) {
   Swal.fire({
     icon: 'warning',
@@ -77,9 +75,7 @@ window.mostrarAviso = function(titulo, texto) {
   });
 };
 
-/**
- * Confirma ação do usuário
- */
+
 window.confirmarAcao = async function(titulo, texto, textoConfirmar = 'Sim', textoCancelar = 'Cancelar') {
   const result = await Swal.fire({
     title: titulo,
@@ -94,23 +90,14 @@ window.confirmarAcao = async function(titulo, texto, textoConfirmar = 'Sim', tex
   return result.isConfirmed;
 };
 
-/**
- * Formata valor monetário
- */
 window.formatarPreco = function(valor) {
   return 'R$ ' + parseFloat(valor).toFixed(2).replace('.', ',');
 };
 
-/**
- * Parse de preço (converte string para número)
- */
+
 window.parsePreco = function(valor) {
   return parseFloat(String(valor).replace(',', '.'));
 };
-
-// ============================================
-// LOGS E DEBUGGING (DESENVOLVIMENTO)
-// ============================================
 
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
   console.log('%c🎨 Sistema de Gestão de Cardápio', 'font-size: 20px; font-weight: bold; color: #1abc9c;');

@@ -24,7 +24,7 @@ module.exports = {
 
   adicionarItem: async (req, res) => {
     const clienteId = req.session.clienteId;
-    let { produto_id, quantidade = 1, preco } = req.body;
+    let { produto_id, quantidade = 1, preco, preco_unitario, tamanho } = req.body;
 
     produto_id = Number(produto_id);
     quantidade = Number(quantidade);
@@ -39,7 +39,13 @@ module.exports = {
 
       const pedidoId = await Carrinho.obterOuCriarRascunhoId(clienteId, conn);
 
-      let precoUnit = await Carrinho.precoProduto(produto_id, conn);
+      // Priorizar preco_unitario (de tamanhos) sobre preco genérico
+      let precoUnit = null;
+      if (preco_unitario && Number.isFinite(Number(preco_unitario))) {
+        precoUnit = Number(preco_unitario);
+      } else {
+        precoUnit = await Carrinho.precoProduto(produto_id, conn);
+      }
 
       if ((precoUnit == null || !Number.isFinite(precoUnit)) && Number.isFinite(Number(preco)) && Number(preco) > 0) {
         precoUnit = Number(preco);
@@ -50,11 +56,15 @@ module.exports = {
         return res.status(404).json({ error: 'Produto não encontrado' });
       }
 
-      const existente = await Carrinho.buscarItemDoPedido(pedidoId, produto_id, conn);
+      // Buscar item existente considerando tamanho (se fornecido)
+      const existente = tamanho 
+        ? await Carrinho.buscarItemComTamanho(pedidoId, produto_id, tamanho, conn)
+        : await Carrinho.buscarItemDoPedido(pedidoId, produto_id, conn);
+        
       if (existente) {
         await Carrinho.aumentarQuantidadeItem(existente.id, quantidade, precoUnit, conn);
       } else {
-        await Carrinho.inserirItem(pedidoId, produto_id, quantidade, precoUnit, conn);
+        await Carrinho.inserirItemComTamanho(pedidoId, produto_id, quantidade, precoUnit, tamanho, conn);
       }
 
       await Carrinho.tocarPedido(pedidoId, conn);

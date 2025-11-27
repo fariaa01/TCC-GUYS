@@ -36,6 +36,7 @@ async function listarItensComProduto(pedidoId, conn = pool) {
         pi.produto_id,
         pi.quantidade,
         pi.preco_unitario,
+        pi.tamanho,
         (pi.quantidade * pi.preco_unitario) AS subtotal,
         COALESCE(m.nome_prato, m.nome, m.titulo, m.descricao) AS produto_nome,
         m.imagem
@@ -162,6 +163,24 @@ async function finalizarRascunho(clienteId, conn = pool) {
   return pedidoId;
 }
 
+async function buscarItemComTamanho(pedidoId, produtoId, tamanho, conn = pool) {
+  const [rows] = await conn.query(
+    `SELECT id, quantidade FROM pedido_itens
+     WHERE pedido_id = ? AND produto_id = ? AND tamanho = ?
+     LIMIT 1`,
+    [pedidoId, produtoId, tamanho]
+  );
+  return rows[0] || null;
+}
+
+async function inserirItemComTamanho(pedidoId, produtoId, quantidade, precoUnitario, tamanho = null, conn = pool) {
+  await conn.query(
+    `INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco_unitario, tamanho)
+     VALUES (?, ?, ?, ?, ?)`,
+    [pedidoId, produtoId, quantidade, precoUnitario, tamanho]
+  );
+}
+
 module.exports = {
   getRascunhoId,
   criarRascunho,
@@ -169,8 +188,10 @@ module.exports = {
   listarItensComProduto,
   precoProduto,
   buscarItemDoPedido,
+  buscarItemComTamanho,
   aumentarQuantidadeItem,
   inserirItem,
+  inserirItemComTamanho,
   atualizarQuantidadeItemCliente,
   obterPedidoIdDoItemCliente,
   removerItemPorId,

@@ -40,6 +40,7 @@ body {
 .container {
   max-width: 1200px;
   margin: auto;
+  margin-bottom: 40px;
 }
 
 h1,
@@ -366,7 +367,7 @@ input[type="date"]:focus,
   gap: 8px;
 }
 
-.table-wrap {
+.table-wrap { 
   width: 100%;
   overflow: auto;
   border-radius: 0 0 16px 16px;
