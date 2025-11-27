@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finalizar Pedido - <%= empresaNome || 'Cardápio' %></title>
+  <link rel="stylesheet" href="/checkout/checkout.css">
+</head>
+<body>
+  <div class="checkout-container">
+    <header class="checkout-header">
+      <button class="btn-voltar" onclick="window.history.back()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <h1>Revisar Pedido</h1>
+    </header>
+
+    <main class="checkout-main">
+      <section class="estabelecimento-info">
+        <h2><%= empresaNome || 'Estabelecimento' %></h2>
+        <% if (locals.empresaEndereco) { %>
+          <p class="endereco"><%= empresaEndereco %></p>
+        <% } %>
+      </section>
+
+      <section class="itens-pedido">
+        <h3>Itens do Pedido</h3>
+        <div id="lista-itens" class="lista-itens"></div>
+      </section>
+
+      <section class="entrega-section">
+        <h3>Informações de Entrega</h3>
+        <div class="form-grid">
+          <div class="form-group span-2">
+            <label for="endereco">Endereço completo</label>
+            <input type="text" id="endereco" placeholder="Rua, número, complemento">
+          </div>
+          <div class="form-group">
+            <label for="bairro">Bairro</label>
+            <input type="text" id="bairro" placeholder="Digite o bairro">
+          </div>
+          <div class="form-group">
+            <label for="cidade">Cidade</label>
+            <input type="text" id="cidade" placeholder="Digite a cidade">
+          </div>
+          <div class="form-group">
+            <label for="cep">CEP</label>
+            <input type="text" id="cep" placeholder="00000-000">
+          </div>
+          <div class="form-group">
+            <label for="telefone">Telefone</label>
+            <input type="text" id="telefone" placeholder="(00) 00000-0000">
+          </div>
+        </div>
+      </section>
+
+      <section class="pagamento-section">
+        <h3>Forma de Pagamento</h3>
+
+        <div class="payment-methods">
+          <label class="payment-option">
+            <input type="radio" name="payment" value="pix" checked>
+            <div class="payment-card">
+              <div class="payment-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M9.5 6.5L12 9L14.5 6.5M14.5 17.5L12 15L9.5 17.5M6.5 9.5L9 12L6.5 14.5M17.5 9.5L15 12L17.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="payment-info">
+                <span class="payment-name">PIX</span>
+                <span class="payment-desc">Aprovação instantânea</span>
+              </div>
+              <div class="payment-check">✓</div>
+            </div>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="payment" value="credito">
+            <div class="payment-card">
+              <div class="payment-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
+                  <path d="M2 10h20" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="payment-info">
+                <span class="payment-name">Cartão de Crédito</span>
+                <span class="payment-desc">Parcele em até 12x</span>
+              </div>
+              <div class="payment-check">✓</div>
+            </div>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="payment" value="debito">
+            <div class="payment-card">
+              <div class="payment-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="payment-info">
+                <span class="payment-name">Cartão de Débito</span>
+                <span class="payment-desc">À vista</span>
+              </div>
+              <div class="payment-check">✓</div>
+            </div>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="payment" value="dinheiro">
+            <div class="payment-card">
+              <div class="payment-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="payment-info">
+                <span class="payment-name">Dinheiro</span>
+                <span class="payment-desc">Pagamento na entrega</span>
+              </div>
+              <div class="payment-check">✓</div>
+            </div>
+          </label>
+        </div>
+
+        <div id="card-details" class="card-details" style="display: none;">
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label for="card-number">Número do Cartão</label>
+              <input type="text" id="card-number" placeholder="0000 0000 0000 0000" maxlength="19">
+            </div>
+            <div class="form-group span-2">
+              <label for="card-name">Nome no Cartão</label>
+              <input type="text" id="card-name" placeholder="Como está escrito no cartão">
+            </div>
+            <div class="form-group">
+              <label for="card-expiry">Validade</label>
+              <input type="text" id="card-expiry" placeholder="MM/AA" maxlength="5">
+            </div>
+            <div class="form-group">
+              <label for="card-cvv">CVV</label>
+              <input type="text" id="card-cvv" placeholder="000" maxlength="4">
+            </div>
+          </div>
+        </div>
+
+        <div id="change-details" class="change-details" style="display: none;">
+          <div class="form-group">
+            <label for="change-amount">Troco para quanto?</label>
+            <input type="text" id="change-amount" placeholder="R$ 0,00">
+          </div>
+        </div>
+      </section>
+
+      <section class="observacoes-section">
+        <h3>Observações</h3>
+        <textarea id="observacoes" placeholder="Alguma observação sobre o pedido? (opcional)" maxlength="500" rows="4"></textarea>
+        <small class="char-count"><span id="char-count">0</span>/500</small>
+      </section>
+
+      <section class="resumo-pedido">
+        <h3>Resumo</h3>
+        <div class="resumo-linha">
+          <span>Subtotal</span>
+          <span id="subtotal-valor">R$ 0,00</span>
+        </div>
+        <div class="resumo-linha">
+          <span>Taxa de Entrega</span>
+          <span class="delivery-fee">R$ 5,00</span>
+        </div>
+        <div class="resumo-linha cupom-linha">
+          <span>Desconto</span>
+          <span class="discount">- R$ 0,00</span>
+        </div>
+        <div class="resumo-linha destaque">
+          <span>Total</span>
+          <span id="total-valor">R$ 0,00</span>
+        </div>
+
+        <div class="cupom-container">
+          <input type="text" id="cupom-input" placeholder="Código do cupom">
+          <button type="button" class="btn-aplicar-cupom">Aplicar</button>
+        </div>
+      </section>
+
+      <div class="checkout-actions">
+        <button id="btn-finalizar" class="btn-finalizar">Confirmar Pedido</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="/checkout/checkout.js"></script>
+  <script>
+    document.querySelectorAll('input[name="payment"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const cardDetails = document.getElementById('card-details');
+        const changeDetails = document.getElementById('change-details');
+        
+        cardDetails.style.display = 'none';
+        changeDetails.style.display = 'none';
+        
+        if (e.target.value === 'credito' || e.target.value === 'debito') {
+          cardDetails.style.display = 'block';
+        } else if (e.target.value === 'dinheiro') {
+          changeDetails.style.display = 'block';
+        }
+      });
+    });
+
+    const cardNumber = document.getElementById('card-number');
+    if (cardNumber) {
+      cardNumber.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\s/g, '');
+        let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+        e.target.value = formattedValue;
+      });
+    }
+
+    const cardExpiry = document.getElementById('card-expiry');
+    if (cardExpiry) {
+      cardExpiry.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+          value = value.slice(0, 2) + '/' + value.slice(2, 4);
+        }
+        e.target.value = value;
+      });
+    }
+  </script>
+</body>
+</html>

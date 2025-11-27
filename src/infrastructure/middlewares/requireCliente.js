@@ -14,6 +14,11 @@ module.exports = function requireCliente(req, res, next) {
     (req.baseUrl && req.baseUrl.startsWith('/carrinho')) ||
     (req.originalUrl && req.originalUrl.startsWith('/carrinho'));
 
+  // Detecta se é rota do checkout
+  const isCheckout =
+    (req.baseUrl && req.baseUrl.startsWith('/checkout')) ||
+    (req.originalUrl && req.originalUrl.startsWith('/checkout'));
+
   if (req.session && req.session.clienteId) {
     return next();
   }
@@ -24,6 +29,15 @@ module.exports = function requireCliente(req, res, next) {
       authRequired: true,
       mensagem: 'É necessário fazer login para acessar o carrinho.'
     });
+  }
+
+  // Para checkout, redirecionar de volta ao cardápio com indicador de login necessário
+  if (isCheckout) {
+    const restauranteId = req.session.restauranteId;
+    if (restauranteId) {
+      return res.redirect(302, `/cardapio/u/${restauranteId}?login=required`);
+    }
+    return res.redirect(302, '/lojas');
   }
 
   // Navegação de página

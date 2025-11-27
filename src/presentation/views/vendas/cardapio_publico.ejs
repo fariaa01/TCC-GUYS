@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= empresaNome %> — Cardápio</title>
+  <link rel="stylesheet" href="/cardapio/cardapio.css" />
+</head>
+
+<body>
+
+<div class="layout-cardapio">
+  <main class="col-catalogo">
+    <div class="container">
+
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="brand"><%= empresaNome %></h1>
+          <span class="brand-sub">Cardápio</span>
+        </div>
+
+        <div class="topbar-center">
+          <label class="search">
+            <input id="searchMenu" type="search" placeholder="Buscar pratos, categorias..." aria-label="Buscar no cardápio">
+            <button type="button" class="search-clear" aria-label="Limpar busca">✕</button>
+          </label>
+        </div>
+
+        <div class="topbar-right">
+          <a href="/lojas" class="btn-ghost">Trocar de loja</a>
+        </div>
+      </header>
+
+      <% if (!itens || !itens.length) { %>
+        <p class="vazio">Este restaurante ainda não tem itens no cardápio.</p>
+      <% } else { %>
+        <div class="grid-cards">
+          <% itens.forEach(function(i){ %>
+            <div class="card" data-cat="<%= i.categoria || 'Outros' %>">
+
+              <% if (i.desconto) { %>
+                <span class="badge"><%= i.desconto %>%</span>
+              <% } %>
+
+              <% if (i.avaliacao !== undefined && i.avaliacao !== null) { %>
+                <span class="price-badge"><%= Number(i.avaliacao).toFixed(1) %> ★</span>
+              <% } %>
+
+              <% if (i.imagem) { %>
+                <img src="/uploads/<%= i.imagem %>" alt="<%= i.nome_prato %>">
+              <% } else { %>
+                <div class="img-placeholder" aria-label="Sem imagem"></div>
+              <% } %>
+
+              <div class="card-body">
+                <h3 class="titulo"><%= i.nome_prato %></h3>
+
+                <% if (i.descricao) { %>
+                  <p class="desc"><%= i.descricao %></p>
+                <% } else { %>
+                  <p class="desc muted">Sem descrição.</p>
+                <% } %>
+
+                <div class="card-footer">
+                  <strong class="preco">R$ <%= Number(i.preco).toFixed(2).replace('.', ',') %></strong>
+
+                  <button 
+                    type="button"
+                    class="btn ver-item"
+                    data-id="<%= i.id %>"
+                    aria-label="Ver detalhes de <%= i.nome_prato %>">
+                      Detalhes
+                  </button>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+
+    </div>
+  </main>
+</div>
+
+<div id="sideCart" class="side-cart">
+  <h2>
+    Meu Carrinho
+    <button id="closeCart" class="cart-close">✕</button>
+  </h2>
+
+  <div id="cartItems" class="side-cart-items"></div>
+
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Total</span>
+      <span id="cartTotal">R$ 0,00</span>
+    </div>
+    <button id="btnCheckout" class="btn-checkout">Finalizar Pedido</button>
+  </div>
+</div>      
+
+<div id="cartOverlay" class="cart-overlay"></div>
+
+<div id="authModal" class="auth-modal">
+  <div class="auth-overlay" data-close-auth></div>
+  <div class="auth-container">
+    <button class="auth-close" data-close-auth aria-label="Fechar">&times;</button>
+    
+    <div class="auth-tabs">
+      <button id="tab-login" class="auth-tab is-active" role="tab" aria-selected="true">Entrar</button>
+      <button id="tab-cadastro" class="auth-tab" role="tab" aria-selected="false">Cadastrar</button>
+    </div>
+
+    <div id="pane-login" class="auth-pane is-active">
+      <h2 class="auth-title">Bem-vindo de volta!</h2>
+      <p class="auth-subtitle">Entre com suas credenciais</p>
+      
+      <form id="formLogin" data-endpoint-login="/cliente/login">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" name="email" required placeholder="seu@email.com" />
+        </div>
+        
+        <div class="form-group">
+          <label for="loginSenha">Senha</label>
+          <input type="password" id="loginSenha" name="senha" required placeholder="••••••••" />
+        </div>
+
+        <div id="loginFeedback" class="auth-feedback"></div>
+        
+        <button type="submit" class="auth-submit">Entrar</button>
+      </form>
+    </div>
+
+    <div id="pane-cadastro" class="auth-pane" hidden>
+      <h2 class="auth-title">Criar conta</h2>
+      <p class="auth-subtitle">Cadastre-se para fazer pedidos</p>
+      
+      <form id="formCadastro" data-endpoint-cadastro="/cliente/cadastrar">
+        <div class="form-group">
+          <label for="cadastroNome">Nome completo</label>
+          <input type="text" id="cadastroNome" name="nome" required placeholder="Seu nome" />
+        </div>
+
+        <div class="form-group">
+          <label for="cadastroEmail">Email</label>
+          <input type="email" id="cadastroEmail" name="email" required placeholder="seu@email.com" />
+        </div>
+        
+        <div class="form-group">
+          <label for="cadastroSenha">Senha</label>
+          <input type="password" id="cadastroSenha" name="senha" required placeholder="••••••••" minlength="6" />
+        </div>
+
+        <div id="cadastroFeedback" class="auth-feedback"></div>
+        
+        <button type="submit" class="auth-submit">Cadastrar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%= cspNonce %>" src="/cardapio/cardapio.js"></script>
+
+</body>
+</html>
+

@@ -69,15 +69,10 @@ app.use('/dados-fornecedor', require('../src/infrastructure/routes/sistema/dados
 app.use('/gastos-fixos', require('../src/infrastructure/routes/sistema/gastos-fixo'));
 app.use('/pedidos', require('../src/infrastructure/routes/vendas/pedido'));
 app.use('/carrinho', require('../src/infrastructure/routes/vendas/carrinho'));
+app.use('/checkout', require('../src/infrastructure/routes/vendas/checkout'));
 app.use('/', require('../src/infrastructure/routes/usuarios/clienteAuthRoutes'));
 
 app.get('/produto/:id', require('../src/controllers/sistema/estoque/estoqueController').visualizar);
-
-app.get('/checkout', requireCliente, (req, res) => {
-  res.render('vendas/checkout', {
-    clienteId: req.session.clienteId
-  });
-});
 
 app.get('/healthz', (_req, res) => res.status(200).send('ok'));
 

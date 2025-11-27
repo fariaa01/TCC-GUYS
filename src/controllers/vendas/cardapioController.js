@@ -10,8 +10,7 @@ module.exports = {
             }
 
             const cardapio = await pratoModel.listarPorUsuario(usuarioId);
-            // res.render('vendas/cardapio', { pratos: cardapio, usuarioId }); // View não encontrada
-            res.json({ pratos: cardapio, usuarioId }); // Temporário
+            res.json({ pratos: cardapio, usuarioId });
         } catch (error) {
             console.error('Erro ao exibir cardápio:', error);
             res.status(500).send('Erro ao carregar o cardápio');

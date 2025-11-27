@@ -218,6 +218,9 @@ o
         return res.status(404).send('Restaurante não encontrado.');
       }
 
+      // Salvar o restauranteId na sessão para uso no checkout
+      req.session.restauranteId = usuarioId;
+
       const itens = await Menu.getPublicByUsuario(usuarioId);
       return res.render('vendas/cardapio_publico', {
         itens,

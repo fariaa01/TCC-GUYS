@@ -43,6 +43,66 @@ module.exports = {
     }
   },
 
+  // Endpoint para criar pedido via checkout do cardápio
+  checkout: async (req, res) => {
+    try {
+      const clienteId = req.session.clienteId;
+      
+      if (!clienteId) {
+        return res.status(401).json({ error: 'Cliente não autenticado' });
+      }
+
+      const { itens, total } = req.body;
+
+      if (!itens || !Array.isArray(itens) || itens.length === 0) {
+        return res.status(400).json({ error: 'Carrinho vazio' });
+      }
+
+      const pool = require('../../../db');
+      const conn = await pool.getConnection();
+
+      try {
+        await conn.beginTransaction();
+
+        // Criar pedido principal
+        const [pedidoResult] = await conn.query(
+          `INSERT INTO pedidos (cliente_id, status, total, criado_em, atualizado_em)
+           VALUES (?, 'pendente', ?, NOW(), NOW())`,
+          [clienteId, total]
+        );
+
+        const pedidoId = pedidoResult.insertId;
+
+        // Inserir itens do pedido
+        for (const item of itens) {
+          await conn.query(
+            `INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco_unitario)
+             VALUES (?, ?, ?, ?)`,
+            [pedidoId, item.produto_id, item.quantidade, item.preco_unitario]
+          );
+        }
+
+        await conn.commit();
+
+        res.json({ 
+          sucesso: true, 
+          pedidoId: pedidoId,
+          mensagem: 'Pedido criado com sucesso!' 
+        });
+
+      } catch (err) {
+        await conn.rollback();
+        throw err;
+      } finally {
+        conn.release();
+      }
+
+    } catch (err) {
+      console.error('Erro ao criar pedido via checkout:', err);
+      res.status(500).json({ error: 'Erro ao processar pedido' });
+    }
+  },
+
   mostrarCardapioCliente: async (req, res) => {
     try {
       const usuario_id = req.params.usuario_id;
