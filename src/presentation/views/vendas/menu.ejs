@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,219 +8,505 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
 </head>
-
 <body>
+  <div class="container">
+    <h2>Gestão de Cardápio - Produtos para Venda</h2>
 
-  <header class="topbar">
-    <div class="topbar-left">
-      <h1 class="brand">
-        
-      </h1>
-      <span class="brand-sub">Cardápio ativos</span>
-    </div>
+    <a href="/dashboard" class="btn btn--ghost">
+      <i class="fas fa-arrow-left"></i> Voltar
+    </a>
 
-    <div class="topbar-center">
-      <label class="search"> 
-      </label>
-    </div>
-
-    <div class="container">
-      <button class="btn-add" id="btnAbrirCategoria">
-        <i class="fas fa-plus"></i> Adicionar 
-      </button>
-    </div>
-  </header>
-
-
-
-  <div class="grid-cards">
-    <% pratos.forEach(p=> { %>
-      <div class="card <%= (p.arquivado ? 'is-archived' : '') %>" data-id="<%= p.id %>">
-        <% if (p.imagem) { %>
-          <img src="/uploads/<%= p.imagem %>" alt="Foto do prato">
-          <% } else { %>
-            <div class="img-placeholder">Sem imagem</div>
-            <% } %>
-
-              <div class="card-body">
-                <div class="linha-topo">
-                  <h3 class="editable" data-field="nome_prato">
-                    <%= p.nome_prato || p.pedido || p.nome %>
-                  </h3>
-
-                  <span class="badge <%= (p.is_disponivel === 0 ? 'badge-off' : 'badge-on') %>">
-                    <%= (p.is_disponivel===0 ? 'Indisponível' : 'Disponível' ) %>
-                  </span>
-
-                  <% if (p.arquivado) { %>
-                    <span class="badge badge-archived" title="Este item está arquivado">
-                      <i class="fa-solid fa-box-archive"></i> Arquivado
-                    </span>
-                    <% } %>
-                </div>
-
-                <% if (p.ingredientes) { %>
-                  <p><strong>Ingredientes:</strong>
-                    <%= p.ingredientes %>
-                  </p>
-                  <% } %>
-
-                    <% if (typeof p.quantidade !=='undefined' ) { %>
-                      <p><strong>Quantidade:</strong>
-                        <%= p.quantidade %>
-                      </p>
-                      <% } %>
-
-                        <div class="precos-container">
-                          <% if (p.tamanhos && p.tamanhos.length> 0) { %>
-                            <strong>Preços:</strong>
-                            <div class="tamanhos-grid">
-                              <% p.tamanhos.forEach(tamanho=> { %>
-                                <div class="tamanho-item">
-                                  <span class="tamanho-label">
-                                    <%= tamanho.tamanho %>
-                                  </span>
-                                  <span class="tamanho-preco">R$ <%= Number(tamanho.preco).toFixed(2) %></span>
-                                </div>
-                                <% }) %>
-                            </div>
-                            <% } else { %>
-                              <p>
-                                <strong>Preço:</strong>
-                                <span class="editable" data-field="preco">R$ <%= Number(p.preco).toFixed(2) %></span>
-                              </p>
-                              <% } %>
-                        </div>
-
-                        <label class="switch">
-                          <input type="checkbox" class="toggle-disponivel" <%=(p.is_disponivel===0 ? '' : 'checked' ) %>
-                          />
-                          <span class="slider"></span>
-                        </label>
-
-                        <% if (p.observacoes) { %>
-                          <p><strong>Obs:</strong>
-                            <%= p.observacoes %>
-                          </p>
-                          <% } %>
-
-                            <div class="actions">
-                           
-
-                              <% if (p.arquivado) { %>
-                                <button type="button" class="btn-restaurar" data-id="<%= p.id %>">
-                                  <i class="fa-solid fa-rotate-left"></i> Restaurar
-                                </button>
-                                <% } else { %>
-                                  <button type="button" class="btn-arquivar" data-id="<%= p.id %>">
-                                    <i class="fa-solid fa-box-archive"></i> Arquivar
-                                  </button>
-                                  <% } %>
-                              <button type="button" class="btn-editar" data-id="<%= p.id %>">Editar</button>
-
-
-                                    <form action="/menu/delete/<%= p.id %>" method="POST" class="form-excluir">
-                                      <button type="submit" class="btn-excluir">Excluir</button>
-                                    </form>
-                            </div>
-              </div>
-      </div>
-      <% }) %>
+    <button class="btn-add" id="btnAbrirCategoria">
+      <i class="fas fa-plus"></i> Adicionar Produto
+    </button>
   </div>
 
-  <a href="/dashboard" class="btn-voltar"><i class="fas fa-arrow-left"></i> </a>
+  <div class="grid-cards">
+    <% if (pratos && pratos.length > 0) { %>
+      <% pratos.forEach(p => { %>
+        <div class="card <%= (p.arquivado ? 'is-archived' : '') %>" data-id="<%= p.id %>">
+          <% if (p.imagem) { %>
+            <img src="/uploads/<%= p.imagem %>" alt="Foto do produto" />
+          <% } else { %>
+            <div class="img-placeholder">
+              <i class="fas fa-image"></i> Sem imagem
+            </div>
+          <% } %>
 
-  <!-- Modal Categoria -->
+          <div class="card-body">
+            <div class="linha-topo">
+              <h3 class="editable" data-field="nome_prato"><%= p.nome_prato || p.pedido || p.nome %></h3>
+
+              <span class="badge <%= (p.is_disponivel === 0 ? 'badge-off' : 'badge-on') %>">
+                <%= (p.is_disponivel === 0 ? 'Indisponível' : 'Disponível') %>
+              </span>
+
+              <% if (p.arquivado) { %>
+                <span class="badge badge-archived" title="Este item está arquivado">
+                  <i class="fa-solid fa-box-archive"></i> Arquivado
+                </span>
+              <% } %>
+            </div>
+            
+            <% if (p.categoria && typeof p.categoria === 'string' && p.categoria.trim() !== '') { %>
+              <p><strong>Categoria:</strong> <%= p.categoria %></p>
+            <% } %>
+            
+            <% if (p.ingredientes && typeof p.ingredientes === 'string' && p.ingredientes.trim() !== '') { %>
+              <p class="descricao-info"><strong>Descrição:</strong> <%= p.ingredientes %></p>
+            <% } else { %>
+              <p class="descricao-info sem-descricao"><strong>Descrição:</strong> <em>Este produto não possui descrição</em></p>
+            <% } %>
+            
+            <% 
+              const precoValido = p.preco !== null && p.preco !== undefined && p.preco !== '' && !isNaN(Number(p.preco));
+              const temPrecoUnico = precoValido && Number(p.preco) > 0;
+            %>
+            
+            <% if (temPrecoUnico) { %>
+              <p class="preco editable" data-field="preco">
+                <strong>R$ <%= Number(p.preco).toFixed(2).replace('.', ',') %></strong>
+              </p>
+            <% } else { %>
+              <div class="preco-tamanhos">
+                <p class="preco"><strong>Tamanhos e Preços:</strong></p>
+                <% if (p.tamanhos && p.tamanhos.length > 0) { %>
+                  <ul class="lista-tamanhos">
+                    <% p.tamanhos.forEach(function(t) { %>
+                      <li><%= t.tamanho %>: <strong>R$ <%= Number(t.preco).toFixed(2).replace('.', ',') %></strong></li>
+                    <% }) %>
+                  </ul>
+                <% } else { %>
+                  <p class="sem-tamanhos"><em>Nenhum tamanho cadastrado</em></p>
+              </button>
+                <% } %>
+                <button type="button" class="btn-editar-tamanhos" onclick="abrirModalGerenciarTamanhosPersonalizados()">
+                  <i class="fas fa-edit"></i> Gerenciar Tamanhos
+                </button>
+              </div>
+            <% } %>
+
+            <div class="switch <%= p.arquivado ? 'switch-disabled' : '' %>">
+              <label class="toggle">
+                <input 
+                  type="checkbox" 
+                  class="toggle-disponivel" 
+                  data-id="<%= p.id %>" 
+                  <%= (p.is_disponivel === 1) ? 'checked' : '' %>
+                  <%= p.arquivado ? 'disabled' : '' %>
+                />
+                <span class="slider"></span>
+              </label>
+              <span>Disponível para venda</span>
+            </div>
+
+            <div class="actions">
+              <button type="button" class="btn-editar-produto" onclick="abrirModalEditarProduto('<%= p.id %>')">
+                <i class="fas fa-edit"></i>Editar
+              </button>
+
+              <% if (p.arquivado) { %>
+                <button type="button" class="btn-restaurar" data-id="<%= p.id %>">
+                  <i class="fa-solid fa-rotate-left"></i> Restaurar
+                </button>
+              <% } else { %>
+              <% } %>
+
+              <form action="/menu/delete/<%= p.id %>" method="POST" class="form-excluir">
+                <button type="submit" class="btn-excluir">
+                  <i class="fas fa-trash"></i> Excluir
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="empty-state-grid">
+        <i class="fas fa-box-open"></i>
+        <h3>Nenhum produto cadastrado</h3>
+        <p>Clique em "Adicionar Produto" para começar a cadastrar os itens do seu cardápio.</p>
+      </div>
+    <% } %>
+  </div>
+
   <div id="modalCategoria" class="modal">
     <div class="modal-content">
       <span class="close" id="fecharCategoria">&times;</span>
-      <h3>Escolher Categoria</h3>
+      <h3>Escolher Categoria do Produto</h3>
+      <p class="modal-desc">Selecione a categoria do produto que você deseja cadastrar:</p>
+      
       <select id="selectCategoria" required>
         <option value="">Selecione...</option>
-        <option value="lanche">Prato</option>
-        <option value="bebida">Bebida</option>
-        <option value="sobremesa">Sobremesa</option>
+        <% if (categorias && categorias.length > 0) { %>
+          <% categorias.forEach(cat => { %>
+            <option value="<%= cat.nome %>"><%= cat.icone %> <%= cat.nome %></option>
+          <% }) %>
+        <% } else { %>
+          <option value="" disabled>Nenhuma categoria cadastrada</option>
+        <% } %>
       </select>
-      <button class="btn-avancar" id="btnAvancar">Avançar</button>
+      
+      <div class="categoria-actions">
+        <button class="btn-gerenciar-categorias" id="btnGerenciarCategorias">
+          <i class="fas fa-cog"></i> Gerenciar Categorias
+        </button>
+        <button class="btn-avancar" id="btnAvancar">Avançar</button>
+      </div>
     </div>
   </div>
 
-  <!-- Modal Prato -->
   <div id="modalPedido" class="modal">
     <div class="modal-content-pedido">
       <span id="fecharModal" class="close">&times;</span>
-      <h3 id="tituloModal">Novo Prato</h3>
+      <h3 id="tituloModal">Cadastrar Produto</h3>
+      
       <form method="POST" action="/menu/create" class="form-box" enctype="multipart/form-data">
         <input type="hidden" name="categoria" id="inputCategoria" />
-        <input type="text" name="nome_prato" placeholder="Nome do prato" required />
+
+        <input type="text" name="nome_prato" placeholder="Nome do produto *" required />
+        
         <div id="camposDinamicos"></div>
-        <input type="text" name="ingredientes" placeholder="Ingredientes" required />
-        <input type="number" name="quantidade" placeholder="Quantidade" min="1" />
 
-        <!-- Seção de Preços por Tamanho -->
-        <div class="precos-section">
-          <h4>Preços por Tamanho</h4>
-          <div class="checkbox-container">
-            <label>
-              <input type="checkbox" id="multiplosPrecos">
-              Múltiplos tamanhos com preços diferentes
-            </label>
+        <textarea 
+          name="descricao" 
+          placeholder="Descrição do produto (opcional)" 
+          rows="3"
+        ></textarea>
+
+        <div class="upload-section">
+          <label for="foto">Imagem do Produto</label>
+          <div id="dropzone" class="dropzone">
+            <div id="dzThumb" class="dropzone-thumb"></div>
+            <div class="dropzone-text">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Arraste uma imagem ou clique para selecionar</p>
+              <span id="nome-arquivo" class="file-name"></span>
+            </div>
+          </div>
+          <input type="file" name="imagem" id="foto" accept="image/*" hidden />
+        </div>
+
+        <div class="preco-section">
+          <label class="checkbox-label">
+            <input type="checkbox" id="multiplosPrecos" />
+            <span>Este produto possui múltiplos tamanhos/preços</span>
+          </label>
+
+          <div id="precoUnico" class="preco-unico-container">
+            <input 
+              type="number" 
+              step="0.01" 
+              name="preco" 
+              placeholder="Preço (R$) *" 
+              required 
+            />
           </div>
 
-          <!-- Preço único -->
-          <div id="precoUnico" class="preco-input-group">
-            <input type="number" step="0.01" name="preco" placeholder="Preço (R$)" required />
-          </div>
-
-          <!-- Múltiplos preços -->
           <div id="multiplosPrecosList" class="multiplos-precos-container" style="display: none;">
+            <div class="actions-tamanhos-header">
+              <button type="button" class="btn-gerenciar-tamanhos-personalizados-small" onclick="abrirModalGerenciarTamanhosPersonalizados()">
+                <i class="fas fa-cog"></i> Gerenciar Tamanhos Disponíveis
+              </button>
+            </div>
+            
             <div class="tamanho-preco-item">
               <select name="tamanhos[0][tamanho]" required>
-                <option value="">Tamanho...</option>
-                <option value="P">Pequeno (P)</option>
-                <option value="M">Médio (M)</option>
-                <option value="G">Grande (G)</option>
-                <option value="GG">Gigante (GG)</option>
+                <option value="">Carregando tamanhos...</option>
               </select>
               <input type="number" step="0.01" name="tamanhos[0][preco]" placeholder="Preço (R$)" required />
               <button type="button" class="btn-remove-tamanho" onclick="removerTamanho(this)">
                 <i class="fas fa-trash"></i>
               </button>
             </div>
-
             <button type="button" class="btn-add-tamanho" onclick="adicionarTamanho()">
               <i class="fas fa-plus"></i> Adicionar Tamanho
             </button>
           </div>
         </div>
 
-        <div class="upload-box">
-          <input type="file" name="imagem" accept="image/*" id="foto" hidden>
-          <label for="foto" class="dropzone" id="dropzone">
-            <i class="fas fa-image"></i>
-            <div class="dz-text">
-              <strong>Arraste e solte</strong> uma imagem aqui<br />
-              ou <u>clique para selecionar</u>
-              <div class="dz-sub">PNG, JPG ou WEBP • até 2MB</div>
-            </div>
-            <div class="dz-thumb" id="dzThumb" aria-hidden="true"></div>
+        <div class="opcoes-section">
+          <label class="checkbox-label">
+            <input type="checkbox" name="destaque" value="1" />
+            <span>Produto em destaque</span>
           </label>
-          <span id="nome-arquivo">Nenhum arquivo selecionado</span>
+          
+          <label class="checkbox-label">
+            <input type="checkbox" name="is_disponivel" value="1" checked />
+            <span>Disponível para venda</span>
+          </label>
         </div>
 
-        <button class="btn-cadastrar" id="btnCadastrar">Cadastrar</button>
+        <div class="form-buttons">
+          <button type="button" class="btn-cancelar" id="btnCancelarCadastro">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-cadastrar">
+            <i class="fas fa-check"></i> Cadastrar Produto
+          </button>
+        </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal de tamanhos removido -->
+  <div id="modalGerenciarCategorias" class="modal">
+    <div class="modal-content-categorias">
+      <div class="modal-header">
+        <h3>Gerenciar Categorias</h3>
+        <button type="button" class="close" onclick="fecharModalGerenciarCategorias()">&times;</button>
+      </div>
 
-  <script nonce="<%= cspNonce %>" src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
-  <script nonce="<%= cspNonce %>" src="/menu/js/menu-inline.js" defer></script>
-  <script nonce="<%= cspNonce %>" src="/menu/js/menu-modal.js" defer></script>
-  <script nonce="<%= cspNonce %>" src="/menu/js/upload-zone.js" defer></script>
-  <script nonce="<%= cspNonce %>" src="/menu/js/script.js" defer></script>
-  <script nonce="<%= cspNonce %>" src="/cardapio/cardapio.js"></script>
+      <div class="modal-body">
+        <div class="add-categoria-section">
+          <h4>Nova Categoria</h4>
+          <form id="formNovaCategoria" class="form-inline-categoria">
+            <input 
+              type="text" 
+              id="inputNomeCategoria" 
+              placeholder="Nome da categoria" 
+              required 
+              maxlength="100"
+            />
+            <input 
+              type="text" 
+              id="inputIconeCategoria" 
+              placeholder="Ícone (emoji)" 
+              maxlength="10"
+              value="📦"
+            />
+            <button type="submit" class="btn-add-categoria">
+              <i class="fas fa-plus"></i> Adicionar
+            </button>
+          </form>
+        </div>
+
+        <div class="categorias-list-section">
+          <h4>Categorias Cadastradas</h4>
+          <div id="listaCategorias" class="categorias-grid">
+          </div>
+          
+          <div id="emptyCategorias" class="empty-state" style="display: none;">
+            <i class="fas fa-tags"></i>
+            <p>Nenhuma categoria cadastrada</p>
+            <small>Adicione sua primeira categoria acima</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancelar" onclick="fecharModalGerenciarCategorias()">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalGerenciarTamanhos" class="modal">
+    <div class="modal-content-categoria">
+      <div class="modal-header">
+        <h3><i class="fas fa-ruler-combined"></i> Gerenciar Tamanhos Personalizados</h3>
+        <button type="button" class="close" onclick="fecharModalGerenciarTamanhosPersonalizados()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-add-categoria">
+          <h4>Adicionar Novo Tamanho</h4>
+          <form id="formAdicionarTamanho" class="form-inline-categoria">
+            <input 
+              type="text" 
+              id="novoTamanhoNome" 
+              placeholder="Ex: Pequeno, Médio, Grande, 300ml, 500ml..." 
+              required
+              maxlength="50"
+            />
+            <button type="submit" class="btn-add-inline">
+              <i class="fas fa-plus"></i> Adicionar
+            </button>
+          </form>
+        </div>
+
+        <div class="list-section">
+          <h4>Tamanhos Cadastrados</h4>
+          <div id="listaTamanhosPersonalizados" class="categorias-grid">
+          </div>
+          
+          <div id="emptyTamanhosPersonalizados" class="empty-state" style="display: none;">
+            <i class="fas fa-ruler-combined"></i>
+            <p>Nenhum tamanho cadastrado</p>
+            <small>Adicione seu primeiro tamanho acima</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancelar" onclick="fecharModalGerenciarTamanhosPersonalizados()">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalTamanhos" class="modal">
+    <div class="modal-content-tamanhos">
+      <div class="modal-header">
+        <h3>Gerenciar Tamanhos e Preços</h3>
+        <button type="button" class="close" onclick="fecharModalTamanhos()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="produto-nome">
+          <strong>Produto:</strong> <span id="pratoNomeModal"></span>
+        </p>
+
+        <form method="POST" id="formEditarTamanhos">
+          <input type="hidden" id="editPratoId" />
+          
+          <div class="section-header">
+            <h4>Tamanhos Cadastrados</h4>
+            <div class="header-actions">
+              <button type="button" class="btn-gerenciar-tamanhos-personalizados" onclick="abrirModalGerenciarTamanhosPersonalizados()">
+                <i class="fas fa-cog"></i> Gerenciar Tamanhos Personalizados
+              </button>
+              <button type="button" class="btn-add-tamanho-inline" onclick="adicionarTamanhoEdit()">
+                <i class="fas fa-plus"></i> Novo Tamanho
+              </button>
+            </div>
+          </div>
+
+          <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fas fa-box-open"></i>
+            <p>Nenhum tamanho cadastrado</p>
+            <small>Clique em "Novo Tamanho" para adicionar</small>
+          </div>
+
+          <div id="tamanhosEditList" class="tamanhos-list">
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancelar" onclick="fecharModalTamanhos()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-salvar">
+              <i class="fas fa-save"></i> Salvar Alterações
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalEditarProduto" class="modal">
+    <div class="modal-content-pedido">
+      <span class="close" onclick="fecharModalEditarProduto()">&times;</span>
+      <h3>Editar Produto</h3>
+      
+      <form method="POST" id="formEditarProduto" class="form-box" enctype="multipart/form-data">
+        <input type="hidden" id="editarProdutoId" />
+
+        <input type="text" id="editarNome" name="nome_prato" placeholder="Nome do produto *" required />
+        
+        <select id="editarCategoria" name="categoria" required>
+          <option value="">Selecione a categoria...</option>
+          <% if (categorias && categorias.length > 0) { %>
+            <% categorias.forEach(cat => { %>
+              <option value="<%= cat.nome %>"><%= cat.icone %> <%= cat.nome %></option>
+            <% }) %>
+          <% } %>
+        </select>
+
+        <textarea 
+          id="editarDescricao"
+          name="descricao" 
+          placeholder="Descrição do produto (opcional)" 
+          rows="3"
+        ></textarea>
+
+        <div class="upload-section">
+          <label for="editarFoto">Imagem do Produto</label>
+          <div id="editarImagemAtual" class="imagem-atual" style="display: none;">
+            <img id="editarImagemPreview" src="" alt="Imagem atual" style="max-width: 200px; max-height: 150px; object-fit: cover; border-radius: 8px;">
+            <p>Imagem atual</p>
+          </div>
+          <div id="editarDropzone" class="dropzone">
+            <div class="dropzone-text">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Arraste uma nova imagem ou clique para selecionar</p>
+              <span id="editarNomeArquivo" class="file-name"></span>
+            </div>
+          </div>
+          <input type="file" name="imagem" id="editarFoto" accept="image/*" hidden />
+        </div>
+
+        <div class="preco-section">
+          <label class="checkbox-label">
+            <input type="checkbox" id="editarMultiplosPrecos" />
+            <span>Este produto possui múltiplos tamanhos/preços</span>
+          </label>
+
+          <div id="editarPrecoUnico" class="preco-unico-container">
+            <input 
+              type="number" 
+              step="0.01" 
+              id="editarPreco"
+              name="preco" 
+              placeholder="Preço (R$)" 
+            />
+          </div>
+
+          <div id="editarMultiplosPrecosList" class="multiplos-precos-container" style="display: none;">
+            <div class="section-header">
+              <h4>Tamanhos e Preços</h4>
+              <button type="button" class="btn-add-tamanho-inline" onclick="adicionarTamanhoParaEdicao()">
+                <i class="fas fa-plus"></i> Novo Tamanho
+              </button>
+            </div>
+
+            <div id="editarEmptyState" class="empty-state" style="display: none;">
+              <i class="fas fa-box-open"></i>
+              <p>Nenhum tamanho cadastrado</p>
+              <small>Clique em "Novo Tamanho" para adicionar</small>
+            </div>
+
+            <div id="editarTamanhosLista" class="tamanhos-list">
+            </div>
+          </div>
+        </div>
+
+        <div class="opcoes-section">
+          <label class="checkbox-label">
+            <input type="checkbox" id="editarDestaque" name="destaque" value="1" />
+            <span>Produto em destaque</span>
+          </label>
+          
+          <label class="checkbox-label">
+            <input type="checkbox" id="editarDisponivel" name="is_disponivel" value="1" />
+            <span>Disponível para venda</span>
+          </label>
+        </div>
+
+        <div class="form-buttons">
+          <button type="button" class="btn-cancelar" onclick="fecharModalEditarProduto()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-cadastrar">
+            <i class="fas fa-save"></i> Salvar Alterações
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script nonce="<%= cspNonce %>" src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script nonce="<%= cspNonce %>" src="/menu/js/upload-zone.js"></script>
+  <script nonce="<%= cspNonce %>" src="/menu/js/menu-tamanhos.js"></script>
+  <script nonce="<%= cspNonce %>" src="/menu/js/menu-tamanhos-personalizados.js"></script>
+  <script nonce="<%= cspNonce %>" src="/menu/js/menu-categorias.js"></script>
+  <script nonce="<%= cspNonce %>" src="/menu/js/menu-modais.js"></script>
+  <script nonce="<%= cspNonce %>" src="/menu/js/menu-produtos.js"></script>
+  <script nonce="<%= cspNonce %>" src="/menu/js/menu-inline.js"></script>
+  <script nonce="<%= cspNonce %>" src="/menu/js/main.js" defer></script>
+
+
 </body>
-
 </html>
