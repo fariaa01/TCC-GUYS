@@ -6,162 +6,142 @@
   <title><%= empresaNome %> — Cardápio</title>
   <link rel="stylesheet" href="/cardapio/cardapio.css" />
 </head>
-
 <body>
+  <div class="layout-cardapio">
 
-<div class="layout-cardapio">
-  <main class="col-catalogo">
-    <div class="container">
+    <main class="col-catalogo">
+      <div class="container">
 
-      <header class="topbar">
-        <div class="topbar-left">
-          <h1 class="brand"><%= empresaNome %></h1>
-          <span class="brand-sub">Cardápio</span>
-        </div>
+        <!-- TOPO -->
+        <header class="topbar">
+          <h1><%= empresaNome %></h1>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <a href="/restaurantes" class="btn-ghost">Trocar restaurante</a>
 
-        <div class="topbar-center">
-          <label class="search">
-            <input id="searchMenu" type="search" placeholder="Buscar pratos, categorias..." aria-label="Buscar no cardápio">
-            <button type="button" class="search-clear" aria-label="Limpar busca">✕</button>
-          </label>
-        </div>
+            <button type="button" id="btnToggleCart" class="btn-carrinho" aria-label="Ver carrinho" data-endpoint-listar="/carrinho">
+              <span class="icon" aria-hidden="true">
+                <!-- svg -->
+              </span>
+              <span class="label">Carrinho</span>
+              <span id="badge-carrinho" class="badge-carrinho">0</span>
+            </button>
+          </div>
+        </header>
 
-        <div class="topbar-right">
-          <a href="/lojas" class="btn-ghost">Trocar de loja</a>
-        </div>
-      </header>
-
-      <% if (!itens || !itens.length) { %>
-        <p class="vazio">Este restaurante ainda não tem itens no cardápio.</p>
-      <% } else { %>
-        <div class="grid-cards">
-          <% itens.forEach(function(i){ %>
-            <div class="card" data-cat="<%= i.categoria || 'Outros' %>">
-
-              <% if (i.desconto) { %>
-                <span class="badge"><%= i.desconto %>%</span>
-              <% } %>
-
-              <% if (i.avaliacao !== undefined && i.avaliacao !== null) { %>
-                <span class="price-badge"><%= Number(i.avaliacao).toFixed(1) %> ★</span>
-              <% } %>
-
-              <% if (i.imagem) { %>
-                <img src="/uploads/<%= i.imagem %>" alt="<%= i.nome_prato %>">
-              <% } else { %>
-                <div class="img-placeholder" aria-label="Sem imagem"></div>
-              <% } %>
-
-              <div class="card-body">
-                <h3 class="titulo"><%= i.nome_prato %></h3>
-
-                <% if (i.descricao) { %>
-                  <p class="desc"><%= i.descricao %></p>
-                <% } else { %>
-                  <p class="desc muted">Sem descrição.</p>
+        <!-- LISTA DE ITENS -->
+        <% if (!itens || !itens.length) { %>
+          <p class="vazio">Este restaurante ainda não tem itens no cardápio.</p>
+        <% } else { %>
+          <div class="grid-cards">
+            <% itens.forEach(function(i){ %>
+              <div class="card" data-cat="<%= i.categoria || 'Outros' %>">
+                <% if (i.desconto) { %><span class="badge"><%= i.desconto %>%</span><% } %>
+                <% if (i.avaliacao !== undefined && i.avaliacao !== null) { %>
+                  <span class="price-badge"><%= Number(i.avaliacao).toFixed(1) %> ★</span>
                 <% } %>
 
-                <div class="card-footer">
-                  <strong class="preco">R$ <%= Number(i.preco).toFixed(2).replace('.', ',') %></strong>
+                <% if (i.imagem) { %>
+                  <img src="/uploads/<%= i.imagem %>" alt="<%= i.nome_prato %>">
+                <% } else { %>
+                  <div class="img-placeholder" aria-label="Sem imagem"></div>
+                <% } %>
 
-                  <button 
-                    type="button"
-                    class="btn ver-item"
-                    data-id="<%= i.id %>"
-                    aria-label="Ver detalhes de <%= i.nome_prato %>">
-                      Detalhes
-                  </button>
+                <div class="card-body">
+                  <h3 class="titulo"><%= i.nome_prato %></h3>
+                  <% if (i.descricao) { %>
+                    <p class="desc"><%= i.descricao %></p>
+                  <% } else { %>
+                    <p class="desc muted">Sem descrição.</p>
+                  <% } %>
+
+                  <div class="card-footer">
+                    <strong class="preco">R$ <%= Number(i.preco).toFixed(2).replace('.', ',') %></strong>
+
+                    <!-- botão CORRETO -->
+                    <button 
+                      type="button"
+                      class="btn adicionar-carrinho"
+                      data-id="<%= i.id %>">
+                      Adicionar ao carrinho
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          <% }) %>
+            <% }) %>
+          </div>
+        <% } %>
+
+      </div>
+    </main>
+
+    <!-- CARRINHO (sidebar) -->
+    <aside class="cart">
+      <section id="carrinho-container" class="cart-list"></section>
+
+      <section class="resumo">
+        <div class="linha"><span>Itens</span><strong id="subtotal">R$ 0,00</strong></div>
+        <div class="linha desconto"><span>Desconto</span><strong id="taxas">R$ 0,00</strong></div>
+        <div class="linha total"><span>Total</span><strong id="total">R$ 0,00</strong></div>
+      </section>
+
+      <section class="pagamentos">
+        <h4>Pagamentos</h4>
+        <div class="opcoes">
+          <button class="pay active" type="button" data-pay="cash">Dinheiro</button>
+          <button class="pay" type="button" data-pay="debit">Débito</button>
+          <button class="pay" type="button" data-pay="credit">Crédito</button>
+          <button class="pay" type="button" data-pay="ewallet">Pix</button>
         </div>
-      <% } %>
+      </section>
 
-    </div>
-  </main>
-</div>
+      <footer class="cart-footer">
+        <button id="limpar" class="btn-outline" type="button">Limpar carrinho</button>
+        <a href="/checkout" class="btn-primary" id="ir-checkout">Checkout</a>
+      </footer>
+    </aside>
 
-<div id="sideCart" class="side-cart">
-  <h2>
-    Meu Carrinho
-    <button id="closeCart" class="cart-close">✕</button>
-  </h2>
+    <div id="cartBackdrop" class="cart-backdrop"></div>
 
-  <div id="cartItems" class="side-cart-items"></div>
-
-  <div class="cart-footer">
-    <div class="cart-total">
-      <span>Total</span>
-      <span id="cartTotal">R$ 0,00</span>
-    </div>
-    <button id="btnCheckout" class="btn-checkout">Finalizar Pedido</button>
   </div>
-</div>      
 
-<div id="cartOverlay" class="cart-overlay"></div>
+  <!-- MODAL LOGIN -->
+  <div id="authModal" class="auth-modal" aria-hidden="true">
+    <div class="auth-backdrop" data-close-auth></div>
+    <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <header class="auth-header">
+        <h3 id="authTitle">Identifique-se</h3>
+        <button class="auth-close" type="button" aria-label="Fechar" data-close-auth>✕</button>
+      </header>
 
-<div id="authModal" class="auth-modal">
-  <div class="auth-overlay" data-close-auth></div>
-  <div class="auth-container">
-    <button class="auth-close" data-close-auth aria-label="Fechar">&times;</button>
-    
-    <div class="auth-tabs">
-      <button id="tab-login" class="auth-tab is-active" role="tab" aria-selected="true">Entrar</button>
-      <button id="tab-cadastro" class="auth-tab" role="tab" aria-selected="false">Cadastrar</button>
-    </div>
+      <nav class="auth-tabs" role="tablist" aria-label="Acesso do cliente">
+        <button class="auth-tab is-active" role="tab" aria-selected="true" aria-controls="pane-login" id="tab-login">Entrar</button>
+        <button class="auth-tab" role="tab" aria-selected="false" aria-controls="pane-cadastro" id="tab-cadastro">Cadastrar</button>
+      </nav>
 
-    <div id="pane-login" class="auth-pane is-active">
-      <h2 class="auth-title">Bem-vindo de volta!</h2>
-      <p class="auth-subtitle">Entre com suas credenciais</p>
-      
-      <form id="formLogin" data-endpoint-login="/cliente/login">
-        <div class="form-group">
-          <label for="loginEmail">Email</label>
-          <input type="email" id="loginEmail" name="email" required placeholder="seu@email.com" />
-        </div>
-        
-        <div class="form-group">
-          <label for="loginSenha">Senha</label>
-          <input type="password" id="loginSenha" name="senha" required placeholder="••••••••" />
-        </div>
+      <section id="pane-login" class="auth-pane is-active" role="tabpanel" aria-labelledby="tab-login">
+        <form id="formLogin" class="auth-form" autocomplete="on" data-endpoint-login="/cliente/login">
+          <input type="hidden" name="next" value="/checkout" />
+          <label class="auth-field"><span>Email</span><input type="email" name="email" required/></label>
+          <label class="auth-field"><span>Senha</span><input type="password" name="senha" required minlength="4"/></label>
+          <button class="auth-submit" type="submit">Entrar</button>
+          <p class="auth-feedback" id="loginFeedback" aria-live="polite"></p>
+        </form>
+      </section>
 
-        <div id="loginFeedback" class="auth-feedback"></div>
-        
-        <button type="submit" class="auth-submit">Entrar</button>
-      </form>
-    </div>
-
-    <div id="pane-cadastro" class="auth-pane" hidden>
-      <h2 class="auth-title">Criar conta</h2>
-      <p class="auth-subtitle">Cadastre-se para fazer pedidos</p>
-      
-      <form id="formCadastro" data-endpoint-cadastro="/cliente/cadastrar">
-        <div class="form-group">
-          <label for="cadastroNome">Nome completo</label>
-          <input type="text" id="cadastroNome" name="nome" required placeholder="Seu nome" />
-        </div>
-
-        <div class="form-group">
-          <label for="cadastroEmail">Email</label>
-          <input type="email" id="cadastroEmail" name="email" required placeholder="seu@email.com" />
-        </div>
-        
-        <div class="form-group">
-          <label for="cadastroSenha">Senha</label>
-          <input type="password" id="cadastroSenha" name="senha" required placeholder="••••••••" minlength="6" />
-        </div>
-
-        <div id="cadastroFeedback" class="auth-feedback"></div>
-        
-        <button type="submit" class="auth-submit">Cadastrar</button>
-      </form>
+      <section id="pane-cadastro" class="auth-pane" role="tabpanel" aria-labelledby="tab-cadastro" hidden>
+        <form id="formCadastro" class="auth-form" autocomplete="on" data-endpoint-cadastro="/cliente/cadastrar">
+          <input type="hidden" name="next" value="/checkout" />
+          <label class="auth-field"><span>Nome</span><input type="text" name="nome" required/></label>
+          <label class="auth-field"><span>Email</span><input type="email" name="email" required/></label>
+          <label class="auth-field"><span>Senha</span><input type="password" name="senha" required minlength="4"/></label>
+          <button class="auth-submit" type="submit">Criar conta</button>
+          <p class="auth-feedback" id="cadastroFeedback" aria-live="polite"></p>
+        </form>
+      </section>
     </div>
   </div>
-</div>
 
-<script nonce="<%= cspNonce %>" src="/cardapio/cardapio.js"></script>
-
+  <!-- SCRIPTS -->
+  <script nonce="<%= cspNonce %>" src="/cardapio/cardapio.js"></script>
 </body>
 </html>
-
