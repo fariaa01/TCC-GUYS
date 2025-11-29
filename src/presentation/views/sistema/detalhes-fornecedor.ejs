@@ -11,8 +11,8 @@
   <div class="container">
     <div class="header">
       <h2><%= typeof isNew !== 'undefined' && isNew ? 'Cadastrar novo fornecedor' : 'Dados do Fornecedor' %></h2>
-      <a href="/dados-fornecedor" class="btn-voltar">
-        <i class="fas fa-arrow-left"></i> Voltar para Lista
+      <a href="/dados-fornecedor" class="btn btn--ghost">
+        <i class="fas fa-arrow-left"></i> Voltar
       </a>
     </div>
     <form method="POST" action="<%= typeof isNew !== 'undefined' && isNew ? '/dados-fornecedor/create' : `/dados-fornecedor/${fornecedor ? fornecedor.id : ''}/update` %>">
@@ -255,7 +255,9 @@
 
       <button id="btnSalvarAlteracoes" type="submit" style="display:none;">Salvar Alterações</button>
     </form>
-    <a href="/dados-fornecedor" class="btn-voltar">⬅ Voltar</a>
+    <a href="/dados-fornecedor" class="btn btn--ghost">
+      <i class="fas fa-arrow-left"></i> Voltar
+    </a>
   </div>
 
   <script nonce="<%= cspNonce %>" src="https://unpkg.com/imask"></script>

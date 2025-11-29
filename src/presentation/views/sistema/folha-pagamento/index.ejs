@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Folha de Pagamento</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/folha-pagamento/folha-pagamento.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="page-head">
+      <div>
+        <h1> Folha de Pagamento</h1>
+      </div>
+      <div class="head-actions">
+        <a href="/dashboard" class="btn btn--ghost">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+        <button class="btn btn--primary" onclick="abrirModalGerar()">
+          <i class="fas fa-plus-circle"></i> Gerar Nova Folha
+        </button>
+      </div>
+    </header>
+
+    <% if (folhas && folhas.length > 0) { %>
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title"><i class="fas fa-list"></i> Histórico de Folhas</h2>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Período</th>
+                <th>Funcionários</th>
+                <th>Total Bruto</th>
+                <th>Descontos</th>
+                <th>Total Líquido</th>
+                <th>Status</th>
+                <th>Data Geração</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% folhas.forEach(f => { %>
+                <tr>
+                  <td><strong><%= meses[f.mes_referencia - 1] %>/<%= f.ano_referencia %></strong></td>
+                  <td><%= f.total_funcionarios %></td>
+                  <td>R$ <%= parseFloat(f.total_bruto || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></td>
+                  <td>R$ <%= parseFloat(f.total_descontos || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></td>
+                  <td><strong>R$ <%= parseFloat(f.total_liquido || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></strong></td>
+                  <td>
+                    <span class="badge <%= 
+                      f.status === 'paga' ? 'badge-success' : 
+                      f.status === 'aprovada' ? 'badge-info' : 
+                      f.status === 'em_revisao' ? 'badge-warning' : 'badge-default' 
+                    %>">
+                      <%= f.status === 'paga' ? 'Paga' : 
+                          f.status === 'aprovada' ? 'Aprovada' : 
+                          f.status === 'em_revisao' ? 'Em Revisão' : 'Pendente' %>
+                    </span>
+                  </td>
+                  <td><%= new Date(f.data_geracao).toLocaleDateString('pt-BR') %></td>
+                  <td class="actions">
+                    <a href="/folha-pagamento/<%= f.id %>" class="btn btn--sm btn--info" title="Ver Detalhes">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <% if (f.status === 'pendente' || f.status === 'em_revisao') { %>
+                      <button class="btn btn--sm btn--danger btn-excluir-folha" data-id="<%= f.id %>" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    <% } else { %>
+      <section class="empty-state">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <h3>Nenhuma Folha de Pagamento Gerada</h3>
+      </section>
+    <% } %>
+  </div>
+
+  <div id="modalGerar" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModalGerar()">&times;</span>
+      <h3> Gerar Nova Folha de Pagamento</h3>
+      
+      <form method="POST" action="/folha-pagamento/gerar">
+        <div class="form-group">
+          <label for="mes">Mês de Referência</label>
+          <select name="mes" id="mes" required>
+            <% meses.forEach((m, i) => { %>
+              <option value="<%= i + 1 %>" <%= (new Date().getMonth() === i) ? 'selected' : '' %>>
+                <%= m %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="ano">Ano de Referência</label>
+          <input type="number" name="ano" id="ano" value="<%= new Date().getFullYear() %>" min="2020" max="2100" required />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn--ghost" onclick="fecharModalGerar()">Cancelar</button>
+          <button type="submit" class="btn btn--primary">
+            <i class="fas fa-check"></i> Gerar Folha
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script nonce="<%= cspNonce %>">
+    function abrirModalGerar() {
+      document.getElementById('modalGerar').style.display = 'flex';
+    }
+
+    function fecharModalGerar() {
+      document.getElementById('modalGerar').style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const botoesExcluir = document.querySelectorAll('.btn-excluir-folha');
+      botoesExcluir.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          Swal.fire({
+            title: 'Excluir Folha?',
+            text: 'Esta ação não pode ser desfeita!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              const form = document.createElement('form');
+              form.method = 'POST';
+              form.action = `/folha-pagamento/${id}/deletar`;
+              document.body.appendChild(form);
+              form.submit();
+            }
+          });
+        });
+      });
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const msg = urlParams.get('msg');
+    const erro = urlParams.get('erro');
+
+    if (msg) {
+      Swal.fire('Sucesso!', msg, 'success');
+    }
+    if (erro) {
+      Swal.fire('Erro!', erro, 'error');
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('modalGerar');
+      if (event.target === modal) {
+        fecharModalGerar();
+      }
+    };
+  </script>
+</body>
+</html>

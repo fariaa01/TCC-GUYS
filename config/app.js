@@ -60,6 +60,7 @@ app.use('/relatorios', require('../src/infrastructure/routes/sistema/relatorios'
 app.use('/empresa', require('../src/infrastructure/routes/sistema/empresa'));
 app.use('/dashboard', require('../src/infrastructure/routes/sistema/dashboard'));
 app.use('/funcionarios', require('../src/infrastructure/routes/sistema/funcionario'));
+app.use('/folha-pagamento', require('../src/infrastructure/routes/sistema/folha-pagamento'));
 app.use('/estoque', require('../src/infrastructure/routes/sistema/estoque'));
 app.use('/lojas', require('../src/infrastructure/routes/vendas/lojas'));
 app.use('/financeiro', require('../src/infrastructure/routes/sistema/financeiro'));
@@ -86,9 +87,13 @@ app.use((req, res) => {
   }
 });
 
+const cronJobs = require('../src/services/cronJobs');
+cronJobs.iniciarCronJobs();
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Sistema de folha de pagamento automático ativo`);
 });
 
 module.exports = app;

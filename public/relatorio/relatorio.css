@@ -98,6 +98,33 @@
   height: 500px !important;
   max-height: 600px;
 }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  .btn--ghost {
+    background: white;
+    color: #2c3e50;
+    border: 2px solid #bdc3c7;
+  }
+
+  .btn--ghost:hover {
+    border-color: #1abc9c;
+    color: #1abc9c;
+  }
+
   .btn-voltar {
     background-color: #3489dd;
     color: white;

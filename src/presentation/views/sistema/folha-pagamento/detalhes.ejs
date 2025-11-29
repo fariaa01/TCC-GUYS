@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Folha de Pagamento - <%= meses[folha.mes_referencia - 1] %>/<%= folha.ano_referencia %></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/folha-pagamento/folha-pagamento.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="page-head">
+      <div>
+        <h1><i class="fas fa-file-invoice-dollar"></i> Folha de Pagamento</h1>
+        <p class="subtitle"><%= meses[folha.mes_referencia - 1] %>/<%= folha.ano_referencia %></p>
+      </div>
+      <div class="head-actions">
+        <a href="/folha-pagamento" class="btn btn--ghost">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+        <button class="btn btn--info" onclick="gerarPDF()">
+          <i class="fas fa-file-pdf"></i> Gerar PDF
+        </button>
+        <button class="btn btn--success" onclick="exportarExcel()">
+          <i class="fas fa-file-excel"></i> Exportar Excel
+        </button>
+        <% if (folha.status === 'pendente' || folha.status === 'em_revisao') { %>
+          <form method="POST" action="/folha-pagamento/<%= folha.id %>/aprovar" style="display: inline;">
+            <button type="submit" class="btn btn--success">
+              <i class="fas fa-check-circle"></i> Aprovar
+            </button>
+          </form>
+        <% } %>
+        <% if (folha.status === 'aprovada') { %>
+          <button class="btn btn--primary" onclick="abrirModalPagar()">
+            <i class="fas fa-money-bill-wave"></i> Marcar como Pago
+          </button>
+        <% } %>
+      </div>
+    </header>
+
+    <section class="cards">
+      <div class="card kpi">
+        <span class="kpi-label">Total Bruto</span>
+        <span class="kpi-value">R$ <%= parseFloat(folha.total_bruto || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></span>
+      </div>
+      <div class="card kpi danger">
+        <span class="kpi-label">Total Descontos</span>
+        <span class="kpi-value">R$ <%= parseFloat(folha.total_descontos || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></span>
+      </div>
+      <div class="card kpi success">
+        <span class="kpi-label">Total Líquido</span>
+        <span class="kpi-value">R$ <%= parseFloat(folha.total_liquido || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></span>
+      </div>
+      <div class="card kpi info">
+        <span class="kpi-label">Status</span>
+        <span class="kpi-badge <%= 
+          folha.status === 'paga' ? 'badge-success' : 
+          folha.status === 'aprovada' ? 'badge-info' : 
+          'badge-default' 
+        %>">
+          <%= folha.status === 'paga' ? 'Paga' : 
+              folha.status === 'aprovada' ? 'Aprovada' : 
+              folha.status === 'em_revisao' ? 'Em Revisão' : 'Pendente' %>
+        </span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><i class="fas fa-users"></i> Detalhamento por Funcionário</h2>
+      </div>
+
+      <div class="table-wrap">
+        <table id="tabelaFolha">
+          <thead>
+            <tr>
+              <th>Funcionário</th>
+              <th>Cargo</th>
+              <th>Salário Base</th>
+              <th>Bônus</th>
+              <th>Total Proventos</th>
+              <th>INSS</th>
+              <th>FGTS</th>
+              <th>Total Descontos</th>
+              <th>Salário Líquido</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% itens.forEach(item => { %>
+              <tr>
+                <td><strong><%= item.funcionario_nome %></strong><br/><small><%= item.funcionario_cpf %></small></td>
+                <td><%= item.funcionario_cargo %></td>
+                <td>R$ <%= parseFloat(item.salario_base || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></td>
+                <td>
+                  <% if (item.bonus > 0) { %>
+                    <span class="badge badge-success">+ R$ <%= parseFloat(item.bonus).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></span>
+                  <% } else { %>
+                    -
+                  <% } %>
+                </td>
+                <td><strong>R$ <%= parseFloat(item.total_proventos || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></strong></td>
+                <td>R$ <%= parseFloat(item.inss || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></td>
+                <td>R$ <%= parseFloat(item.fgts || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></td>
+                <td class="text-danger"><strong>R$ <%= parseFloat(item.total_descontos || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></strong></td>
+                <td class="text-success"><strong>R$ <%= parseFloat(item.salario_liquido || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></strong></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <div id="modalPagar" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModalPagar()">&times;</span>
+      <h3><i class="fas fa-money-bill-wave"></i> Registrar Pagamento</h3>
+      
+      <form method="POST" action="/folha-pagamento/<%= folha.id %>/pagar">
+        <div class="form-group">
+          <label for="data_pagamento">Data do Pagamento</label>
+          <input type="date" name="data_pagamento" id="data_pagamento" value="<%= new Date().toISOString().split('T')[0] %>" required />
+        </div>
+
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle"></i>
+          <p><strong>Esta ação irá:</strong></p>
+          <ul>
+            <li>Marcar a folha como "Paga"</li>
+            <li>Registrar uma saída no financeiro no valor de <strong>R$ <%= parseFloat(folha.total_liquido || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></strong></li>
+          </ul>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn--ghost" onclick="fecharModalPagar()">Cancelar</button>
+          <button type="submit" class="btn btn--primary">
+            <i class="fas fa-check"></i> Confirmar Pagamento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script nonce="<%= cspNonce %>">
+    function abrirModalPagar() {
+      document.getElementById('modalPagar').style.display = 'flex';
+    }
+
+    function fecharModalPagar() {
+      document.getElementById('modalPagar').style.display = 'none';
+    }
+
+    function gerarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      doc.setFontSize(18);
+      doc.text('Folha de Pagamento', 14, 20);
+      doc.setFontSize(12);
+      doc.text('<%= meses[folha.mes_referencia - 1] %>/<%= folha.ano_referencia %>', 14, 28);
+      
+      doc.setFontSize(10);
+      doc.text('Total Bruto: R$ <%= parseFloat(folha.total_bruto || 0).toFixed(2).replace(".", ",") %>', 14, 38);
+      doc.text('Total Descontos: R$ <%= parseFloat(folha.total_descontos || 0).toFixed(2).replace(".", ",") %>', 14, 44);
+      doc.text('Total Liquido: R$ <%= parseFloat(folha.total_liquido || 0).toFixed(2).replace(".", ",") %>', 14, 50);
+
+      const linhas = document.querySelectorAll('#tabelaFolha tbody tr');
+      const tableData = [];
+      
+      linhas.forEach(linha => {
+        const cols = linha.querySelectorAll('td');
+        if (cols.length >= 9) {
+          const nome = cols[0].querySelector('strong').textContent;
+          const salario = cols[2].textContent.trim();
+          const bonus = cols[3].textContent.includes('R$') ? cols[3].querySelector('.badge').textContent.replace('+ ', '') : 'R$ 0,00';
+          const proventos = cols[4].textContent.trim();
+          const inss = cols[5].textContent.trim();
+          const descontos = cols[7].textContent.trim();
+          const liquido = cols[8].textContent.trim();
+          
+          tableData.push([nome, salario, bonus, proventos, inss, descontos, liquido]);
+        }
+      });
+      
+      doc.autoTable({
+        startY: 60,
+        head: [['Funcionario', 'Salario', 'Bonus', 'Proventos', 'INSS', 'Descontos', 'Liquido']],
+        body: tableData,
+        theme: 'grid',
+        styles: { fontSize: 8 }
+      });
+      
+      doc.save('folha-pagamento-<%= folha.mes_referencia %>-<%= folha.ano_referencia %>.pdf');
+    }
+
+    function exportarExcel() {
+      let csv = '\ufeff';
+      csv += 'Funcionario;CPF;Cargo;Salario Base;Bonus;Total Proventos;INSS;FGTS;Total Descontos;Salario Liquido\n';
+      
+      const linhas = document.querySelectorAll('#tabelaFolha tbody tr');
+      linhas.forEach(linha => {
+        const cols = linha.querySelectorAll('td');
+        if (cols.length >= 9) {
+          const nome = cols[0].querySelector('strong').textContent.trim();
+          const cpf = cols[0].querySelector('small').textContent.trim();
+          const cargo = cols[1].textContent.trim();
+          const salario = cols[2].textContent.replace('R$', '').trim();
+          const bonus = cols[3].textContent.includes('R$') ? 
+            cols[3].querySelector('.badge').textContent.replace('+ R$', '').trim() : '0,00';
+          const proventos = cols[4].textContent.replace('R$', '').trim();
+          const inss = cols[5].textContent.replace('R$', '').trim();
+          const fgts = cols[6].textContent.replace('R$', '').trim();
+          const descontos = cols[7].textContent.replace('R$', '').trim();
+          const liquido = cols[8].textContent.replace('R$', '').trim();
+          
+          csv += `${nome};${cpf};${cargo};${salario};${bonus};${proventos};${inss};${fgts};${descontos};${liquido}\n`;
+        }
+      });
+
+      csv += '\n';
+      csv += 'RESUMO\n';
+      csv += 'Total Bruto;R$ <%= parseFloat(folha.total_bruto || 0).toFixed(2).replace(".", ",") %>\n';
+      csv += 'Total Descontos;R$ <%= parseFloat(folha.total_descontos || 0).toFixed(2).replace(".", ",") %>\n';
+      csv += 'Total Liquido;R$ <%= parseFloat(folha.total_liquido || 0).toFixed(2).replace(".", ",") %>\n';
+      csv += 'Status;<%= folha.status %>\n';
+      csv += 'Periodo;<%= meses[folha.mes_referencia - 1] %>/<%= folha.ano_referencia %>\n';
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'folha-pagamento-<%= folha.mes_referencia %>-<%= folha.ano_referencia %>.csv');
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      Swal.fire('Sucesso!', 'Arquivo Excel exportado com sucesso!', 'success');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const botoesHolerite = document.querySelectorAll('.btn-gerar-holerite');
+      botoesHolerite.forEach(btn => {
+        btn.addEventListener('click', function() {
+          Swal.fire('Em desenvolvimento', 'Funcionalidade de holerite individual em breve!', 'info');
+        });
+      });
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const msg = urlParams.get('msg');
+    const erro = urlParams.get('erro');
+
+    if (msg) {
+      Swal.fire('Sucesso!', msg, 'success');
+    }
+    if (erro) {
+      Swal.fire('Erro!', erro, 'error');
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('modalPagar');
+      if (event.target === modal) {
+        fecharModalPagar();
+      }
+    };
+  </script>
+</body>
+</html>
