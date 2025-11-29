@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comparar Preços - <%= produto.produto %></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/comparacao/comparacao.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="page-head">
+      <div>
+        <h1><%= produto.produto %></h1>
+        <p class="subtitle">
+          <% if (produto.categoria) { %>
+            <span class="badge badge--secondary"><%= produto.categoria %></span>
+          <% } %>
+          Unidade: <%= produto.unidade_medida || 'un' %>
+        </p>
+      </div>
+      <div class="head-actions">
+        <a href="/comparacao" class="btn btn--ghost">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Comparação de preços por fornecedor</h2>
+      </div>
+      <div class="panel-body">
+        <% if (precos && precos.length > 0) { %>
+          <% const menorPreco = Math.min(...precos.map(p => p.menor_preco)); %>
+          
+          <table>
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 80px;">Posição</th>
+                <th>Fornecedor</th>
+                <th class="text-center">Menor Preço</th>
+                <th class="text-center">Maior Preço</th>
+                <th class="text-center">Preço Médio</th>
+                <th class="text-center">Total Compras</th>
+                <th class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% precos.forEach((preco, index) => { 
+                const isMaisBarato = preco.menor_preco === menorPreco;
+              %>
+                <tr>
+                  <td class="text-center">
+                    <% if (isMaisBarato) { %>
+                      <i class="fas fa-trophy text-success" style="font-size: 24px;"></i>
+                      <div style="font-weight: 700; color: #27ae60;">1º</div>
+                    <% } else { %>
+                      <div style="font-size: 18px; font-weight: 700; color: #7f8c8d;"><%= index + 1 %>º</div>
+                    <% } %>
+                  </td>
+                  <td>
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                      <strong style="font-size: 16px;"><i class="fas fa-store"></i> <%= preco.fornecedor_nome %></strong>
+                      <% if (isMaisBarato) { %>
+                        <span class="badge badge--success">
+                          <i class="fas fa-check"></i> MELHOR PREÇO
+                        </span>
+                      <% } %>
+                      <% if (preco.fornecedor_cidade) { %>
+                        <small class="text-muted">
+                          <i class="fas fa-map-marker-alt"></i> <%= preco.fornecedor_cidade %>
+                        </small>
+                      <% } %>
+                      <% if (preco.fornecedor_telefone) { %>
+                        <small class="text-muted">
+                          <i class="fas fa-phone"></i> <%= preco.fornecedor_telefone %>
+                        </small>
+                      <% } %>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <strong style="font-size: 18px; color: #27ae60;">
+                      R$ <%= Number(preco.menor_preco).toFixed(2) %>
+                    </strong>
+                    <% if (isMaisBarato) { %>
+                      <% const maiorPrecoGeral = Math.max(...precos.map(p => p.menor_preco)); %>
+                      <% const economia = maiorPrecoGeral - preco.menor_preco; %>
+                      <% if (economia > 0) { %>
+                        <div style="font-size: 11px; color: #27ae60; margin-top: 5px;">
+                          <i class="fas fa-piggy-bank"></i> Economiza R$ <%= economia.toFixed(2) %>
+                        </div>
+                      <% } %>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <strong style="color: #e74c3c;">
+                      R$ <%= Number(preco.maior_preco).toFixed(2) %>
+                    </strong>
+                  </td>
+                  <td class="text-center">
+                    <strong>
+                      R$ <%= Number(preco.preco_medio).toFixed(2) %>
+                    </strong>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge badge--info">
+                     <%= preco.total_compras %>
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <% if (preco.total_compras > 1) { %>
+                      <a href="/comparacao/historico?produto=<%= encodeURIComponent(preco.produto) %>&fornecedor=<%= encodeURIComponent(preco.fornecedor_nome) %>" 
+                         class="btn btn--sm btn--secondary">
+                        <i class="fas fa-history"></i> Histórico
+                      </a>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+
+          <!-- Resumo Estatístico -->
+          <div class="resumo-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 30px;">
+            <div class="stat-card">
+              <i class="fas fa-arrow-down text-success"></i>
+              <div>
+                <span class="stat-label">Melhor Preço Geral</span>
+                <span class="stat-value text-success">
+                  R$ <%= Math.min(...precos.map(p => p.menor_preco)).toFixed(2) %>
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <i class="fas fa-arrow-up text-danger"></i>
+              <div>
+                <span class="stat-label">Pior Preço Geral</span>
+                <span class="stat-value text-danger">
+                  R$ <%= Math.max(...precos.map(p => p.maior_preco)).toFixed(2) %>
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <i class="fas fa-chart-line text-primary"></i>
+              <div>
+                <span class="stat-label">Média de Todos</span>
+                <span class="stat-value">
+                  <% 
+                    const mediaTodos = precos.reduce((sum, p) => sum + Number(p.preco_medio), 0) / precos.length;
+                  %>
+                  R$ <%= mediaTodos.toFixed(2) %>
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <i class="fas fa-shopping-cart text-info"></i>
+              <div>
+                <span class="stat-label">Total de Compras</span>
+                <span class="stat-value">
+                  <%= precos.reduce((sum, p) => sum + p.total_compras, 0) %> compras
+                </span>
+              </div>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h3>Nenhuma compra registrada para este produto</h3>
+            <p>Cadastre este produto no estoque com o fornecedor para começar a comparar preços</p>
+            <a href="/estoque" class="btn btn--primary">
+              <i class="fas fa-box"></i> Ir para Estoque
+            </a>
+          </div>
+        <% } %>
+
+  <script nonce="<%= cspNonce %>">
+    const urlParams = new URLSearchParams(window.location.search);
+    const msg = urlParams.get('msg');
+    if (msg) {
+      Swal.fire('Sucesso!', msg, 'success');
+    }
+  </script>
+</body>
+</html>

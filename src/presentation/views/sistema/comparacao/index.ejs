@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comparação de Preços</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/comparacao/comparacao.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="page-head">
+      <div>
+        <h1>Comparação de preços</h1>
+        <p class="subtitle">Compare preços dos seus produtos em diferentes fornecedores</p>
+      </div>
+      <div class="head-actions">
+        <a href="/comparacao/ranking" class="btn btn--secondary">
+          <i class="fas fa-trophy"></i> Ranking de fornecedores
+        </a>
+        <a href="/dados-fornecedor" class="btn btn--ghost">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+      </div>
+    </header>
+
+    <% if (produtos && produtos.length > 0) { %>
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">Produtos Comprados</h2>
+        </div>
+        <div class="panel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th class="text-center">Fornecedores</th>
+                <th class="text-center">Compras</th>
+                <th class="text-center">Menor Preço</th>
+                <th class="text-center">Maior Preço</th>
+                <th class="text-center">Preço Médio</th>
+                <th class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% produtos.forEach(produto => { %>
+                <tr>
+                  <td><strong><%= produto.nome %></strong></td>
+                  <td><%= produto.categoria || '-' %></td>
+                  <td class="text-center">
+                    <span class="badge badge--info"><%= produto.total_fornecedores %></span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge badge--secondary"><%= produto.total_compras %> compras</span>
+                  </td>
+                  <td class="text-center text-success">
+                    <strong>R$ <%= Number(produto.menor_preco).toFixed(2) %></strong>
+                  </td>
+                  <td class="text-center text-danger">
+                    R$ <%= Number(produto.maior_preco).toFixed(2) %>
+                  </td>
+                  <td class="text-center">
+                    R$ <%= Number(produto.preco_medio).toFixed(2) %>
+                  </td>
+                  <td class="text-center">
+                    <a href="/comparacao/<%= encodeURIComponent(produto.nome) %>" class="btn btn--sm btn--primary">
+                      <i class="fas fa-eye"></i> Comparar
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    <% } else { %>
+      <section class="empty-state">
+        <i class="fas fa-shopping-cart"></i>
+        <h2>Nenhuma compra registrada</h2>
+        <p>Quando você cadastrar produtos no estoque com fornecedores, eles aparecerão aqui para comparação de preços</p>
+        <a href="/estoque" class="btn btn--primary">
+          <i class="fas fa-box"></i> Ir para Estoque
+        </a>
+      </section>
+    <% } %>
+  </div>
+
+  <script nonce="<%= cspNonce %>">
+    const urlParams = new URLSearchParams(window.location.search);
+    const msg = urlParams.get('msg');
+    const erro = urlParams.get('erro');
+    
+    if (msg) {
+      Swal.fire('Sucesso!', msg, 'success');
+    }
+    if (erro) {
+      Swal.fire('Erro!', erro, 'error');
+    }
+  </script>
+</body>
+</html>

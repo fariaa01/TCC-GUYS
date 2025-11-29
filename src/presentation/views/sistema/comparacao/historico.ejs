@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Histórico de Compras - <%= produto %></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/comparacao/comparacao.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="page-head">
+      <div>
+        <h1>Histórico de Compras</h1>
+        <p class="subtitle">
+          <strong><%= produto %></strong> - Fornecedor: <strong><%= fornecedor %></strong>
+        </p>
+      </div>
+      <div class="head-actions">
+        <a href="/comparacao/<%= encodeURIComponent(produto) %>" class="btn btn--ghost">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><i class="fas fa-list"></i> Últimas Compras</h2>
+      </div>
+      <div class="panel-body">
+        <% if (historico && historico.length > 0) { %>
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th class="text-center">Quantidade</th>
+                <th class="text-center">Valor Unitário</th>
+                <th class="text-center">Validade</th>
+                <th>Fornecedor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% historico.forEach(item => { %>
+                <tr>
+                  <td><strong><%= item.produto %></strong></td>
+                  <td><%= item.categoria || '-' %></td>
+                  <td class="text-center"><%= item.quantidade %></td>
+                  <td class="text-center">
+                    <strong>R$ <%= Number(item.valor).toFixed(2) %></strong>
+                  </td>
+                  <td class="text-center">
+                    <%= item.data_compra_formatada || '-' %>
+                  </td>
+                  <td><%= item.fornecedor %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+
+          <!-- Resumo -->
+          <div class="resumo-stats" style="margin-top: 30px;">
+            <div class="stat-card">
+              <i class="fas fa-arrow-down text-success"></i>
+              <div>
+                <span class="stat-label">Menor Valor</span>
+                <span class="stat-value text-success">
+                  R$ <%= Math.min(...historico.map(h => h.valor)).toFixed(2) %>
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <i class="fas fa-arrow-up text-danger"></i>
+              <div>
+                <span class="stat-label">Maior Valor</span>
+                <span class="stat-value text-danger">
+                  R$ <%= Math.max(...historico.map(h => h.valor)).toFixed(2) %>
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <i class="fas fa-chart-line text-primary"></i>
+              <div>
+                <span class="stat-label">Valor Médio</span>
+                <span class="stat-value">
+                  R$ <%= (historico.reduce((sum, h) => sum + Number(h.valor), 0) / historico.length).toFixed(2) %>
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <i class="fas fa-shopping-cart text-info"></i>
+              <div>
+                <span class="stat-label">Total de Compras</span>
+                <span class="stat-value">
+                  <%= historico.length %>
+                </span>
+              </div>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h3>Nenhuma compra encontrada</h3>
+            <p>Não há histórico de compras para este produto com este fornecedor</p>
+          </div>
+        <% } %>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ranking de Fornecedores</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/comparacao/comparacao.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="page-head">
+      <div>
+        <h1><i class="fas fa-trophy"></i> Ranking de Fornecedores</h1>
+        <p class="subtitle">Fornecedores com os melhores preços no geral</p>
+      </div>
+      <div class="head-actions">
+        <a href="/comparacao" class="btn btn--ghost">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><i class="fas fa-medal"></i> Top Fornecedores Mais Econômicos</h2>
+      </div>
+      <div class="panel-body">
+        <% if (ranking && ranking.length > 0) { %>
+          <table>
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 80px;">Posição</th>
+                <th>Fornecedor</th>
+                <th class="text-center">Produtos com Menor Preço</th>
+                <th class="text-center">Total de Compras</th>
+                <th class="text-center">Preço Médio Geral</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% ranking.forEach((forn, index) => { %>
+                <tr>
+                  <td class="text-center">
+                    <% if (index === 0) { %>
+                      <i class="fas fa-trophy icon-gold" style="font-size: 24px;"></i>
+                      <div style="font-weight: 700; color: #FFD700;">1º</div>
+                    <% } else if (index === 1) { %>
+                      <i class="fas fa-medal icon-silver" style="font-size: 24px;"></i>
+                      <div style="font-weight: 700; color: #C0C0C0;">2º</div>
+                    <% } else if (index === 2) { %>
+                      <i class="fas fa-medal icon-bronze" style="font-size: 24px;"></i>
+                      <div style="font-weight: 700; color: #CD7F32;">3º</div>
+                    <% } else { %>
+                      <div style="font-size: 18px; font-weight: 700; color: #7f8c8d;"><%= index + 1 %>º</div>
+                    <% } %>
+                  </td>
+                  <td>
+                    <strong style="font-size: 16px;"><%= forn.nome %></strong>
+                    <% if (index === 0) { %>
+                      <span class="badge badge--success" style="margin-left: 10px;">
+                        <i class="fas fa-star"></i> MELHOR FORNECEDOR
+                      </span>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge badge--primary" style="font-size: 14px;">
+                      <i class="fas fa-crown"></i> <%= forn.produtos_mais_baratos %>
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge badge--info" style="font-size: 14px;">
+                      <i class="fas fa-shopping-cart"></i> <%= forn.total_compras %>
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <strong style="font-size: 16px; color: #27ae60;">
+                      R$ <%= Number(forn.preco_medio_geral).toFixed(2) %>
+                    </strong>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <div class="empty-state">
+            <i class="fas fa-trophy"></i>
+            <h3>Nenhum fornecedor no ranking ainda</h3>
+            <p>Quando você cadastrar produtos no estoque com fornecedores, o ranking será gerado automaticamente</p>
+            <a href="/estoque" class="btn btn--primary">
+              <i class="fas fa-box"></i> Ir para Estoque
+            </a>
+          </div>
+        <% } %>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
