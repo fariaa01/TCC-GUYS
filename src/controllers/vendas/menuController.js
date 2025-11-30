@@ -23,21 +23,56 @@ module.exports = {
   },
   
   criarPrato: async (req, res) => {
+    const usuarioId = req.session.userId;
     try {
-      const usuarioId = req.session.userId;
+      if (!usuarioId) return res.redirect('/login');
+
       const { categoria, nome_prato, ingredientes, quantidade, preco, tamanhos } = req.body;
 
-      const temPrecoUnico = preco !== undefined && preco !== '';
-      const temTamanhos = tamanhos && Array.isArray(tamanhos) && tamanhos.length > 0;
-      
+      const temPrecoUnico = preco !== undefined && preco !== '' && preco !== null;
+      let temTamanhos = false;
+      let tamanhosArray = [];
+
+      if (Array.isArray(tamanhos)) {
+        tamanhosArray = tamanhos.filter(t => t.tamanho && t.preco && t.tamanho.trim() !== '' && t.preco.trim() !== '');
+        temTamanhos = tamanhosArray.length > 0;
+      } else {
+        // Parse from req.body keys
+        const keys = Object.keys(req.body);
+        const tamanhosMap = {};
+
+        keys.forEach(key => {
+          const match = key.match(/^tamanhos\[(\d+)\]\[(tamanho|preco)\]$/);
+          if (match) {
+            const index = match[1];
+            const field = match[2];
+
+            if (!tamanhosMap[index]) {
+              tamanhosMap[index] = {};
+            }
+            tamanhosMap[index][field] = req.body[key];
+          }
+        });
+
+        tamanhosArray = Object.keys(tamanhosMap)
+          .map(index => tamanhosMap[index])
+          .filter(t => t.tamanho && t.preco && t.tamanho.trim() !== '' && t.preco.trim() !== '')
+          .map(t => ({
+            tamanho: t.tamanho.trim(),
+            preco: parseFloat(t.preco)
+          }));
+
+        temTamanhos = tamanhosArray.length > 0;
+      }
+
       if (!nome_prato) {
         return res.status(400).send('Nome do prato é obrigatório.');
       }
-      
+
       if (!temPrecoUnico && !temTamanhos) {
         return res.status(400).send('Informe um preço único ou múltiplos tamanhos com preços.');
       }
-o
+
       let precoNum = null;
       if (temPrecoUnico && !temTamanhos) {
         precoNum = Number(String(preco).replace(',', '.'));
@@ -107,7 +142,9 @@ o
       res.redirect('/menu');
     } catch (err) {
       console.error('Erro ao criar prato:', err);
-      res.status(500).send('Erro ao criar prato');
+      console.error('Dados recebidos:', req.body);
+      console.error('Usuario ID:', usuarioId);
+      res.status(500).send('Erro ao criar prato: ' + err.message);
     }
   },
 
