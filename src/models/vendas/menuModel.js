@@ -1,7 +1,7 @@
 const db = require('../../../db');
 
 const ALLOWED_COLUMNS = new Set([
-  'nome_prato','preco','descricao','imagem','ingredientes','categoria','tamanho','porcao',
+  'nome_prato','preco','descricao','imagem','ingredientes','categoria',
   'destaque','is_disponivel','arquivado','atualizado_por'
 ]);
 
@@ -45,23 +45,23 @@ module.exports = {
   create: async (dados) => {
     const {
       nome_prato, preco, descricao = null, imagem = null, usuario_id,
-      destaque = 0, ingredientes = null, categoria = null, tamanho = null, porcao = null,
+      destaque = 0, ingredientes = null, categoria = null,
       is_disponivel = 1, arquivado = 0, atualizado_por = null
     } = dados;
 
     const sql = `
       INSERT INTO menu
-        (nome_prato, preco, descricao, imagem, usuario_id, destaque, ingredientes, categoria, tamanho, porcao, is_disponivel, arquivado, atualizado_por)
+        (nome_prato, preco, descricao, imagem, usuario_id, destaque, ingredientes, categoria, is_disponivel, arquivado, atualizado_por)
       VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const [result] = await db.query(sql, [
       nome_prato, preco, descricao, imagem, usuario_id,
-      destaque ? 1 : 0, ingredientes, categoria, tamanho, porcao,
+      destaque ? 1 : 0, ingredientes, categoria,
       is_disponivel ? 1 : 0, arquivado ? 1 : 0, atualizado_por
     ]);
-    
+
     return result.insertId;
   },
 
