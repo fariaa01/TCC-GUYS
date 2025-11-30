@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>TCC-GUYS | Transforme seu TCC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/landingpage/landing.css">
+</head>
+<body>
+  <div class="hero">
+    <h1>TCC-GUYS</h1>
+    <p>Sua jornada para o TCC perfeito começa aqui.</p>
+    <a href="#inscrever" class="btn">Quero fazer parte</a>
+  </div>
+  <div class="container">
+    <h2>O que é o TCC-GUYS?</h2>
+    <p>Uma plataforma colaborativa criada para facilitar a vida de estudantes na elaboração, revisão e apresentação do Trabalho de Conclusão de Curso.</p>
+    <ul>
+      <li>Acompanhe o progresso do TCC</li>
+      <li>Colabore com colegas e orientadores</li>
+      <li>Ferramentas para revisão, feedback e entrega</li>
+    </ul>
+    <hr>
+    <h3 id="inscrever">Cadastre seu e-mail para novidades</h3>
+    <% if (typeof mensagem !== 'undefined') { %>
+      <p class="mensagem"><%= mensagem %></p>
+    <% } %>
+    <form method="POST" action="/inscricao">
+      <input type="email" name="email" required placeholder="Seu e-mail">
+      <button type="submit" class="btn">Cadastrar</button>
+    </form>
+  </div>
+  <footer>
+    &copy; 2025 TCC-GUYS | <a href="https://github.com/fariaa01/TCC-GUYS" target="_blank">Ver repositório</a>
+  </footer>
+  <script>
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', function(e){
+        if(this.getAttribute('href') === '#inscrever'){
+          e.preventDefault();
+          document.getElementById('inscrever').scrollIntoView({behavior:'smooth'});
+        }
+      });
+    });
+  </script>
+</body>
+</html>

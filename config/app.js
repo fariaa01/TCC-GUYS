@@ -5,9 +5,12 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
+const landingRoutes = require('../src/infrastructure/routes/sistema/landing');
+
 const security = require('../src/infrastructure/middlewares/security');
 const tourFlag = require('../src/infrastructure/middlewares/tourFlag');
 const requireCliente = require('../src/infrastructure/middlewares/requireCliente');
+
 
 const app = express();
 
@@ -50,6 +53,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/landing', require('../src/infrastructure/routes/sistema/landing'));
 app.use('/tour', require('../src/infrastructure/routes/sistema/tour'));
 app.use('/', require('../src/infrastructure/routes/usuarios/auth'));
 app.use('/cardapio', require('../src/infrastructure/routes/vendas/cardapio'));
@@ -99,3 +103,5 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+
