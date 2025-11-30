@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Ponto</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/comparacao/comparacao.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="page-head">
+      <div>
+        <h1>Controle de Ponto</h1>
+        <p class="subtitle">Registre e acompanhe a jornada de trabalho dos funcionários</p>
+      </div>
+      <div class="head-actions">
+        <a href="/ponto/produtividade?mes=<%= mesAtual %>" class="btn btn--secondary">
+          Produtividade
+        </a>
+        <a href="/dashboard" class="btn btn--ghost">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-body">
+        <form method="GET" action="/ponto" class="form-row">
+          <div class="form-group">
+            <label for="funcionario_id">Funcionário</label>
+            <select id="funcionario_id" name="funcionario_id" onchange="this.form.submit()">
+              <option value="">Todos os funcionários</option>
+              <% funcionarios.forEach(func => { %>
+                <option value="<%= func.id %>" <%= funcionario_id == func.id ? 'selected' : '' %>>
+                  <%= func.nome %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="mes">Mês</label>
+            <input type="month" id="mes" name="mes" value="<%= mesAtual %>" onchange="this.form.submit()" />
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Registrar ponto manualmente</h2>
+      </div>
+      <div class="panel-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px;">
+          <div style="background: linear-gradient(135deg, #5a6c7d, #6c7a89); padding: 20px; border-radius: 10px; color: white;">
+            <h3 style="margin-bottom: 10px;">Registro Rápido</h3>
+            <p style="font-size: 14px; margin-bottom: 15px;">Registra o horário atual automaticamente</p>
+            <button type="button" onclick="abrirModalRegistroRapido()" class="btn" style="background: white; color: #5a6c7d; width: 100%;">
+               Registrar Agora
+            </button>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #7b8a8b, #95a5a6); padding: 20px; border-radius: 10px; color: white;">
+            <h3 style="margin-bottom: 10px;">Registro Manual</h3>
+            <p style="font-size: 14px; margin-bottom: 15px;">Permite informar horário específico</p>
+            <button type="button" onclick="abrirModalRegistroManual()" class="btn" style="background: white; color: #7b8a8b; width: 100%;">
+               Informar Horários
+            </button>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #b85555, #c0504d); padding: 20px; border-radius: 10px; color: white;">
+            <h3 style="margin-bottom: 10px;">Registrar Falta</h3>
+            <p style="font-size: 14px; margin-bottom: 15px;">Registra ausência com justificativa do funcionario</p>
+            <button type="button" onclick="abrirModalFalta()" class="btn" style="background: white; color: #b85555; width: 100%;">
+               Registrar Falta
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="modalRegistroRapido" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+      <div style="background:white; padding:30px; border-radius:10px; max-width:500px; width:90%;">
+        <h2>Registro Rápido de Ponto</h2>
+        <p style="color: #7f8c8d; margin-bottom: 20px;">O horário atual será registrado automaticamente</p>
+        <form method="POST" action="/ponto/registrar">
+          <div class="form-group">
+            <label for="rapido_funcionario_id">Funcionário *</label>
+            <select id="rapido_funcionario_id" name="funcionario_id" required>
+              <option value="">Selecione...</option>
+              <% funcionarios.forEach(func => { %>
+                <option value="<%= func.id %>"><%= func.nome %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="rapido_observacoes">Observações</label>
+            <input type="text" id="rapido_observacoes" name="observacoes" placeholder="Opcional" />
+          </div>
+
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <strong>Horário que será registrado:</strong><br>
+            <span id="horaAtual" style="font-size: 24px; color: #2c3e50;"></span>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn--primary" style="flex: 1;">
+              <i class="fas fa-check"></i> Confirmar Registro
+            </button>
+            <button type="button" onclick="fecharModalRegistroRapido()" class="btn btn--ghost" style="flex: 1;">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="modalRegistroManual" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+      <div style="background:white; padding:30px; border-radius:10px; max-width:600px; width:90%;">
+        <h2>Registro manual da carga horária</h2>
+        <p style="color: #7f8c8d; margin-bottom: 20px;">Informe os horários de entrada e/ou saída</p>
+        <form method="POST" action="/ponto/registrar-manual">
+          <div class="form-group">
+            <label for="manual_funcionario_id">Funcionário *</label>
+            <select id="manual_funcionario_id" name="funcionario_id" required>
+              <option value="">Selecione...</option>
+              <% funcionarios.forEach(func => { %>
+                <option value="<%= func.id %>"><%= func.nome %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="manual_data">Data *</label>
+            <input type="date" id="manual_data" name="data" required value="<%= new Date().toISOString().split('T')[0] %>" />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+              <label for="manual_hora_entrada">
+                 Horário de Entrada
+              </label>
+              <input type="time" id="manual_hora_entrada" name="hora_entrada" />
+            </div>
+
+            <div class="form-group">
+              <label for="manual_hora_saida">
+                 Horário de Saída
+              </label>
+              <input type="time" id="manual_hora_saida" name="hora_saida" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="manual_observacoes">Observações</label>
+            <textarea id="manual_observacoes" name="observacoes" rows="2" placeholder="Motivo do registro manual..."></textarea>
+          </div>
+
+          <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+            <small style="color: #856404;">
+              <i class="fas fa-info-circle"></i> 
+              <strong>Importante:</strong> Informe pelo menos um dos horários (entrada ou saída)
+            </small>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn--primary" style="flex: 1;">
+              <i class="fas fa-check"></i> Salvar Registro
+            </button>
+            <button type="button" onclick="fecharModalRegistroManual()" class="btn btn--ghost" style="flex: 1;">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Registrar Falta -->
+    <div id="modalFalta" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+      <div style="background:white; padding:30px; border-radius:10px; max-width:500px; width:90%;">
+        <h2><i class="fas fa-user-times"></i> Registrar Falta</h2>
+        <form method="POST" action="/ponto/registrar-falta">
+          <div class="form-group">
+            <label for="falta_funcionario_id">Funcionário *</label>
+            <select id="falta_funcionario_id" name="funcionario_id" required>
+              <option value="">Selecione...</option>
+              <% funcionarios.forEach(func => { %>
+                <option value="<%= func.id %>"><%= func.nome %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="data_falta">Data *</label>
+            <input type="date" id="data_falta" name="data" required />
+          </div>
+
+          <div class="form-group">
+            <label for="justificativa_falta">Justificativa</label>
+            <textarea id="justificativa_falta" name="justificativa" rows="3" placeholder="Motivo da falta..."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn btn--danger" style="flex: 1;">
+              <i class="fas fa-check"></i> Confirmar Falta
+            </button>
+            <button type="button" onclick="fecharModalFalta()" class="btn btn--ghost" style="flex: 1;">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Editar Ponto -->
+    <div id="modalEditarPonto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+      <div style="background:white; padding:30px; border-radius:10px; max-width:500px; width:90%;">
+        <h2><i class="fas fa-edit"></i> Editar Registro de Ponto</h2>
+        <form id="formEditarPonto">
+          <input type="hidden" id="edit_registro_id" />
+          
+          <div class="form-group">
+            <label for="edit_data">Data</label>
+            <input type="date" id="edit_data" readonly style="background: #f5f5f5; cursor: not-allowed;" />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+              <label for="edit_hora_entrada">
+                <i class="fas fa-sign-in-alt" style="color: #27ae60;"></i> Hora de Entrada
+              </label>
+              <input type="time" id="edit_hora_entrada" />
+            </div>
+
+            <div class="form-group">
+              <label for="edit_hora_saida">
+                <i class="fas fa-sign-out-alt" style="color: #e74c3c;"></i> Hora de Saída
+              </label>
+              <input type="time" id="edit_hora_saida" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit_observacoes">Observações</label>
+            <textarea id="edit_observacoes" rows="3" placeholder="Observações sobre o registro..."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn btn--primary" style="flex: 1;">
+              <i class="fas fa-save"></i> Salvar Alterações
+            </button>
+            <button type="button" onclick="fecharModalEditarPonto()" class="btn btn--ghost" style="flex: 1;">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Registros de Hoje -->
+    <% 
+      const hoje = new Date().toISOString().split('T')[0];
+      const registrosHoje = (registros || []).filter(r => {
+        if (!r.data) return false;
+        const dataReg = new Date(r.data).toISOString().split('T')[0];
+        return dataReg === hoje;
+      });
+    %>
+    <% if (registrosHoje.length > 0) { %>
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">
+            Registros de Hoje - <%= new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) %>
+          </h2>
+        </div>
+        <div class="panel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>Funcionário</th>
+                <th class="text-center">Entrada</th>
+                <th class="text-center">Saída</th>
+                <th class="text-center">Horas Trabalhadas</th>
+                <th class="text-center">Horas Extras</th>
+                <th class="text-center">Atraso</th>
+                <th>Observações</th>
+                <th class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% registrosHoje.forEach(reg => { %>
+                <tr>
+                  <td><strong><%= reg.funcionario_nome %></strong></td>
+                  <td class="text-center">
+                    <% if (reg.falta) { %>
+                      <span class="badge" style="background: #e74c3c; color: white;">
+                        <i class="fas fa-times-circle"></i> FALTA
+                      </span>
+                    <% } else if (reg.hora_entrada) { %>
+                      <span class="badge badge--success">
+                       <%= reg.entrada_formatada %>
+                      </span>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (reg.falta) { %>
+                      <span class="text-muted">-</span>
+                    <% } else if (reg.hora_saida) { %>
+                      <span class="badge badge--danger">
+                        <%= reg.saida_formatada %>
+                      </span>
+                    <% } else { %>
+                      <span class="badge badge--warning">Em andamento</span>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (reg.falta) { %>
+                      <span class="text-muted">-</span>
+                    <% } else { %>
+                      <strong><%= reg.horas_trabalhadas || '0.00' %>h</strong>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (reg.falta) { %>
+                      <span class="text-muted">-</span>
+                    <% } else if (reg.horas_extras > 0) { %>
+                      <strong style="color: #f39c12;">+<%= reg.horas_extras %>h</strong>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (reg.falta) { %>
+                      <span class="text-muted">-</span>
+                    <% } else if (reg.minutos_atraso > 0) { %>
+                      <span style="color: #e74c3c;"><%= reg.minutos_atraso %>min</span>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (reg.falta && reg.justificativa_falta) { %>
+                      <small class="text-muted" style="color: #e74c3c !important;">
+                        <i class="fas fa-info-circle"></i> <%= reg.justificativa_falta %>
+                      </small>
+                    <% } else { %>
+                      <small class="text-muted"><%= reg.observacoes || '-' %></small>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (!reg.falta) { %>
+                      <button class="btn btn-sm" style="background: #3498db; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;"
+                              onclick="editarPonto(<%= reg.id %>, '<%= reg.data %>', '<%= reg.hora_entrada || '' %>', '<%= reg.hora_saida || '' %>', '<%= reg.observacoes || '' %>')">
+                        <i class="fas fa-edit"></i> Editar
+                      </button>
+                      <button class="btn btn-sm" style="background: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;"
+                              onclick="registrarFaltaDia(<%= reg.funcionario_id %>, '<%= reg.data %>')">
+                        <i class="fas fa-times"></i> Falta
+                      </button>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- Registros do Mês (apenas quando filtrado por funcionário) -->
+    <% if (funcionario_id && registros && registros.length > 0) { %>
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">
+            Registros do Mês - <%= mesAtual.split('-').reverse().join('/') %>
+          </h2>
+        </div>
+        <div class="panel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Funcionário</th>
+                <th class="text-center">Entrada</th>
+                <th class="text-center">Saída</th>
+                <th class="text-center">Horas Trabalhadas</th>
+                <th class="text-center">Horas Extras</th>
+                <th class="text-center">Atraso</th>
+                <th>Observações</th>
+                <th class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% registros.forEach(reg => { %>
+                <tr>
+                  <td><%= reg.data_formatada %></td>
+                  <td><strong><%= reg.funcionario_nome %></strong></td>
+                  <td class="text-center">
+                    <% if (reg.falta) { %>
+                      <span class="badge" style="background: #e74c3c; color: white;">
+                        <i class="fas fa-times-circle"></i> FALTA
+                      </span>
+                    <% } else if (reg.hora_entrada) { %>
+                      <span class="badge badge--success">
+                        <i class="fas fa-sign-in-alt"></i> <%= reg.entrada_formatada %>
+                      </span>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (reg.falta) { %>
+                      <span class="text-muted">-</span>
+                    <% } else if (reg.hora_saida) { %>
+                      <span class="badge badge--danger">
+                        <i class="fas fa-sign-out-alt"></i> <%= reg.saida_formatada %>
+                      </span>
+                    <% } else { %>
+                      <span class="badge badge--warning">Em andamento</span>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (reg.falta) { %>
+                      <span class="text-muted">-</span>
+                    <% } else { %>
+                      <strong><%= reg.horas_trabalhadas || '0.00' %>h</strong>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (reg.falta) { %>
+                      <span class="text-muted">-</span>
+                    <% } else if (reg.horas_extras > 0) { %>
+                      <strong style="color: #f39c12;">+<%= reg.horas_extras %>h</strong>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (reg.falta) { %>
+                      <span class="text-muted">-</span>
+                    <% } else if (reg.minutos_atraso > 0) { %>
+                      <span style="color: #e74c3c;"><%= reg.minutos_atraso %>min</span>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (reg.falta && reg.justificativa_falta) { %>
+                      <small class="text-muted" style="color: #e74c3c !important;">
+                        <i class="fas fa-info-circle"></i> <%= reg.justificativa_falta %>
+                      </small>
+                    <% } else { %>
+                      <small class="text-muted"><%= reg.observacoes || '-' %></small>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (!reg.falta) { %>
+                      <button class="btn btn-sm" style="background: #3498db; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;"
+                              onclick="editarPonto(<%= reg.id %>, '<%= reg.data %>', '<%= reg.hora_entrada || '' %>', '<%= reg.hora_saida || '' %>', '<%= reg.observacoes || '' %>')">
+                        <i class="fas fa-edit"></i> Editar
+                      </button>
+                      <button class="btn btn-sm" style="background: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;"
+                              onclick="registrarFaltaDia(<%= reg.funcionario_id %>, '<%= reg.data %>')">
+                        <i class="fas fa-times"></i> Falta
+                      </button>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    <% } %>
+  </div>
+
+  <script nonce="<%= cspNonce %>">
+    const urlParams = new URLSearchParams(window.location.search);
+    const msg = urlParams.get('msg');
+    const erro = urlParams.get('erro');
+    
+    if (msg) Swal.fire('Sucesso!', msg, 'success');
+    if (erro) Swal.fire('Erro!', erro, 'error');
+
+    // Atualizar hora atual no modal
+    function atualizarHoraAtual() {
+      const agora = new Date();
+      const horas = String(agora.getHours()).padStart(2, '0');
+      const minutos = String(agora.getMinutes()).padStart(2, '0');
+      const segundos = String(agora.getSeconds()).padStart(2, '0');
+      
+      const horaElement = document.getElementById('horaAtual');
+      if (horaElement) {
+        horaElement.textContent = `${horas}:${minutos}:${segundos}`;
+      }
+    }
+
+    // Modal Registro Rápido
+    function abrirModalRegistroRapido() {
+      document.getElementById('modalRegistroRapido').style.display = 'flex';
+      atualizarHoraAtual();
+      setInterval(atualizarHoraAtual, 1000);
+    }
+
+    function fecharModalRegistroRapido() {
+      document.getElementById('modalRegistroRapido').style.display = 'none';
+    }
+
+    // Modal Registro Manual
+    function abrirModalRegistroManual() {
+      document.getElementById('modalRegistroManual').style.display = 'flex';
+    }
+
+    function fecharModalRegistroManual() {
+      document.getElementById('modalRegistroManual').style.display = 'none';
+    }
+
+    // Modal Falta
+    function abrirModalFalta() {
+      document.getElementById('modalFalta').style.display = 'flex';
+    }
+
+    function fecharModalFalta() {
+      document.getElementById('modalFalta').style.display = 'none';
+    }
+
+    // Modal Editar Ponto
+    function editarPonto(registroId, data, entrada, saida, obs) {
+      document.getElementById('edit_registro_id').value = registroId;
+      document.getElementById('edit_data').value = data;
+      document.getElementById('edit_hora_entrada').value = entrada;
+      document.getElementById('edit_hora_saida').value = saida;
+      document.getElementById('edit_observacoes').value = obs;
+      document.getElementById('modalEditarPonto').style.display = 'flex';
+    }
+
+    function fecharModalEditarPonto() {
+      document.getElementById('modalEditarPonto').style.display = 'none';
+    }
+
+    // Submit do formulário de edição
+    document.getElementById('formEditarPonto').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const registroId = document.getElementById('edit_registro_id').value;
+      const entrada = document.getElementById('edit_hora_entrada').value;
+      const saida = document.getElementById('edit_hora_saida').value;
+      const observacoes = document.getElementById('edit_observacoes').value;
+
+      try {
+        const response = await fetch('/ponto/editar', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: registroId,
+            hora_entrada: entrada,
+            hora_saida: saida,
+            observacoes: observacoes
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.sucesso) {
+          Swal.fire('Sucesso!', 'Registro atualizado com sucesso', 'success').then(() => {
+            window.location.reload();
+          });
+        } else {
+          Swal.fire('Erro!', data.mensagem || 'Erro ao atualizar registro', 'error');
+        }
+      } catch (error) {
+        Swal.fire('Erro!', 'Erro ao atualizar registro', 'error');
+      }
+    });
+
+    // Registrar falta direta
+    function registrarFaltaDia(funcionarioId, data) {
+      Swal.fire({
+        title: 'Registrar Falta',
+        html: `
+          <div style="text-align: left; margin-top: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Justificativa:</label>
+            <textarea id="justificativaFalta" class="swal2-input" style="width: 100%; height: 100px; resize: vertical;" placeholder="Digite a justificativa da falta..."></textarea>
+          </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#95a5a6',
+        confirmButtonText: 'Registrar Falta',
+        cancelButtonText: 'Cancelar',
+        preConfirm: () => {
+          const justificativa = document.getElementById('justificativaFalta').value;
+          if (!justificativa || justificativa.trim() === '') {
+            Swal.showValidationMessage('Por favor, informe a justificativa da falta');
+            return false;
+          }
+          return { justificativa };
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const formData = new FormData();
+          formData.append('funcionario_id', funcionarioId);
+          formData.append('data', data);
+          formData.append('justificativa', result.value.justificativa);
+
+          fetch('/ponto/registrar-falta', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.sucesso) {
+              Swal.fire('Sucesso!', data.mensagem, 'success').then(() => {
+                window.location.reload();
+              });
+            } else {
+              Swal.fire('Erro!', data.mensagem, 'error');
+            }
+          })
+          .catch(error => {
+            Swal.fire('Erro!', 'Erro ao registrar falta', 'error');
+          });
+        }
+      });
+    }
+  </script>
+</body>
+</html>

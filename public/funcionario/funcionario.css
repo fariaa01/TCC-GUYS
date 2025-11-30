@@ -61,7 +61,7 @@ h2 {
   border: none;
   font-weight: bold;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  transition: background 0.3s, transform 0.2s;
+  transition: background 0.3s;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -69,7 +69,6 @@ h2 {
 
 .btn-add:hover {
   background: #16a085;
-  transform: translateY(-2px);
 }
 
 table {
@@ -113,8 +112,6 @@ tbody tr:hover {
 
 .btn-excluir:hover {
   background: linear-gradient(135deg, #c0392b, #e53e3e);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
 }
 
 @media (max-width: 768px) {
@@ -311,8 +308,10 @@ td[data-label="Ações"] {
 
 .btn-historico:hover {
   background: linear-gradient(135deg, #5f3dc4, #9775fa);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+}
+
+.btn-historico:hover {
+  background: linear-gradient(135deg, #5f3dc4, #9775fa);
 }
 
 .btn-editar {
@@ -322,8 +321,6 @@ td[data-label="Ações"] {
 
 .btn-editar:hover {
   background: linear-gradient(135deg, #2574c7, #4a92e4);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(52, 137, 221, 0.4);
 }
 
 /* Modal Histórico */
@@ -384,11 +381,9 @@ td[data-label="Ações"] {
   background: linear-gradient(135deg, #45a049, #5cb85c);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
-}
-
-/* Modal Novo Reajuste */
-#modalNovoReajuste.modal {
-  display: none;
+.btn-add-reajuste:hover {
+  background: linear-gradient(135deg, #45a049, #5cb85c);
+} display: none;
   position: fixed;
   z-index: 999;
   top: 0; 
@@ -735,10 +730,9 @@ td[data-label="Ações"] {
   background: #2980b9;
   transform: translateY(-2px);
 }
-
-.pagination-pages {
-  display: flex;
-  align-items: center;
+.pagination-btn:hover {
+  background: #2980b9;
+} align-items: center;
   gap: 5px;
 }
 
@@ -901,11 +895,9 @@ td[data-label="Ações"] {
 .swal-confirm-btn:hover {
   background: linear-gradient(135deg, #c0392b, #e53e3e) !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3) !important;
-}
-
-.swal-cancel-btn {
-  background: linear-gradient(135deg, #6c757d, #8d9498) !important;
+.swal-confirm-btn:hover {
+  background: linear-gradient(135deg, #c0392b, #e53e3e) !important;
+} background: linear-gradient(135deg, #6c757d, #8d9498) !important;
   color: white !important;
   border: none !important;
   border-radius: 8px !important;
@@ -918,5 +910,9 @@ td[data-label="Ações"] {
 .swal-cancel-btn:hover {
   background: linear-gradient(135deg, #5a6268, #7a8287) !important;
   transform: translateY(-2px) !important;
+  box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3) !important;
+}.swal-cancel-btn:hover {
+  background: linear-gradient(135deg, #5a6268, #7a8287) !important;
+}
   box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3) !important;
 }

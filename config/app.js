@@ -61,6 +61,7 @@ app.use('/empresa', require('../src/infrastructure/routes/sistema/empresa'));
 app.use('/dashboard', require('../src/infrastructure/routes/sistema/dashboard'));
 app.use('/funcionarios', require('../src/infrastructure/routes/sistema/funcionario'));
 app.use('/folha-pagamento', require('../src/infrastructure/routes/sistema/folha-pagamento'));
+app.use('/ponto', require('../src/infrastructure/routes/sistema/ponto'));
 app.use('/comparacao', require('../src/infrastructure/routes/sistema/comparacao'));
 app.use('/estoque', require('../src/infrastructure/routes/sistema/estoque'));
 app.use('/lojas', require('../src/infrastructure/routes/vendas/lojas'));

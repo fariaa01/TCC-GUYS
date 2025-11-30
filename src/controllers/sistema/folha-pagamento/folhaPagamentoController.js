@@ -138,6 +138,49 @@ module.exports = {
       for (const func of funcionariosAtivos) {
         const salarioBase = parseFloat(func.salario || 0);
 
+        // Buscar dados do ponto para o mês/ano
+        const mesReferencia = `${ano}-${String(mes).padStart(2, '0')}`;
+        
+        const [dadosPonto] = await connection.query(`
+          SELECT 
+            COALESCE(SUM(rp.horas_extras), 0) as total_horas_extras,
+            COALESCE(SUM(rp.adicional_noturno), 0) as total_adicional_noturno,
+            COALESCE(SUM(CASE WHEN rp.falta = 1 THEN 1 ELSE 0 END), 0) as total_faltas,
+            COALESCE(SUM(rp.minutos_atraso), 0) as total_minutos_atraso,
+            jt.horas_diarias,
+            jt.percentual_noturno
+          FROM registro_ponto rp
+          LEFT JOIN jornada_trabalho jt ON rp.funcionario_id = jt.funcionario_id AND jt.ativo = 1
+          WHERE rp.funcionario_id = ?
+            AND DATE_FORMAT(rp.data, '%Y-%m') = ?
+          GROUP BY jt.horas_diarias, jt.percentual_noturno
+        `, [func.id, mesReferencia]);
+
+        const pontoFunc = dadosPonto[0] || {
+          total_horas_extras: 0,
+          total_adicional_noturno: 0,
+          total_faltas: 0,
+          total_minutos_atraso: 0,
+          horas_diarias: 8,
+          percentual_noturno: 20
+        };
+
+        // Calcular valor da hora
+        const valorHora = salarioBase / 220; // 220 horas mensais (padrão CLT)
+        
+        // Horas extras (50% a mais)
+        const valorHorasExtras = parseFloat(pontoFunc.total_horas_extras) * valorHora * 1.5;
+        
+        // Adicional noturno (percentual configurado)
+        const percentualNoturno = parseFloat(pontoFunc.percentual_noturno || 20) / 100;
+        const valorAdicionalNoturno = parseFloat(pontoFunc.total_adicional_noturno) * valorHora * (1 + percentualNoturno);
+        
+        // Desconto de faltas (dia completo)
+        const valorDescFaltas = parseFloat(pontoFunc.total_faltas) * (salarioBase / 30);
+        
+        // Desconto de atrasos (proporcional)
+        const valorDescAtrasos = (parseFloat(pontoFunc.total_minutos_atraso) / 60) * valorHora;
+
         const [bonusAtivos] = await connection.query(`
           SELECT SUM(salario_novo - salario_anterior) as total_bonus
           FROM historico_salarial
@@ -149,32 +192,51 @@ module.exports = {
         `, [func.id]);
 
         const bonus = parseFloat(bonusAtivos[0]?.total_bonus || 0);
-        const totalProventos = salarioBase + bonus;
+        
+        // Total de proventos (salário + bônus + horas extras + adicional noturno)
+        const outrosProventos = valorHorasExtras + valorAdicionalNoturno;
+        const totalProventos = salarioBase + bonus + outrosProventos;
 
         // Calcular descontos
         const inss = calcularINSS(totalProventos);
         const fgts = calcularFGTS(totalProventos);
-        const totalDescontosFunc = inss;
+        const outrosDescontos = valorDescFaltas + valorDescAtrasos;
+        const totalDescontosFunc = inss + outrosDescontos;
         const salarioLiquido = totalProventos - totalDescontosFunc;
 
-        // Criar item
+        // Criar item com observações do ponto
+        let observacoes = [];
+        if (pontoFunc.total_horas_extras > 0) {
+          observacoes.push(`${pontoFunc.total_horas_extras}h extras (R$ ${valorHorasExtras.toFixed(2)})`);
+        }
+        if (pontoFunc.total_adicional_noturno > 0) {
+          observacoes.push(`${pontoFunc.total_adicional_noturno}h noturnas (R$ ${valorAdicionalNoturno.toFixed(2)})`);
+        }
+        if (pontoFunc.total_faltas > 0) {
+          observacoes.push(`${pontoFunc.total_faltas} falta(s) (desc. R$ ${valorDescFaltas.toFixed(2)})`);
+        }
+        if (pontoFunc.total_minutos_atraso > 0) {
+          observacoes.push(`${pontoFunc.total_minutos_atraso} min atraso (desc. R$ ${valorDescAtrasos.toFixed(2)})`);
+        }
+
         await FolhaPagamento.createItem({
           folha_id: folhaId,
           funcionario_id: func.id,
           salario_base: salarioBase,
           bonus: bonus,
-          horas_extras: 0,
-          valor_horas_extras: 0,
-          outros_proventos: 0,
+          horas_extras: parseFloat(pontoFunc.total_horas_extras),
+          valor_horas_extras: valorHorasExtras,
+          outros_proventos: valorAdicionalNoturno,
           total_proventos: totalProventos,
           inss: inss,
           fgts: fgts,
           vale_transporte: 0,
           vale_refeicao: 0,
           plano_saude: 0,
-          outros_descontos: 0,
+          outros_descontos: outrosDescontos,
           total_descontos: totalDescontosFunc,
-          salario_liquido: salarioLiquido
+          salario_liquido: salarioLiquido,
+          observacoes: observacoes.length > 0 ? observacoes.join('; ') : null
         });
 
         totalBruto += totalProventos;

@@ -21,9 +21,14 @@
       value="<%= search %>"
     />
   </div>
-  <button class="btn-add" id="btnNovoFuncionario" onclick="abrirModalFuncionario()">
-    <i class="fas fa-user-plus"></i> Adicionar Funcionário
-  </button>
+  <div style="display: flex; gap: 10px;">
+    <a href="/ponto" class="btn-add" style="background: #5a6c7d; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+       Controle de Ponto
+    </a>
+    <button class="btn-add" id="btnNovoFuncionario" onclick="abrirModalFuncionario()">
+      <i class="fas fa-user-plus"></i> Adicionar Funcionário
+    </button>
+  </div>
 </div>
 
 
@@ -61,6 +66,12 @@
             <td data-label="Admissão"><%= new Date(f.data_admissao).toLocaleDateString('pt-BR') %></td>
             <td data-label="Estado"><%= f.estado %></td>
             <td data-label="Ações">
+              <a href="/ponto?funcionario_id=<%= f.id %>" 
+                 class="btn-ponto" 
+                 title="Ver Ponto"
+                 style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin-right: 5px;">
+                <i class="fas fa-clock"></i>
+              </a>
               <button class="btn-historico" 
                       data-id="<%= f.id %>"
                       data-nome="<%= f.nome %>"
@@ -151,7 +162,7 @@
       </div>
     <% } %>
 
-    <a href="/dashboard" class="btn btn--ghost">
+    <a href="/dashboard" class="btn btn--ghost" style="margin-top: 30px; display: inline-block;">
       <i class="fas fa-arrow-left"></i> Voltar
     </a>
   </div>

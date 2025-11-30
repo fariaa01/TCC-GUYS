@@ -61,7 +61,7 @@ h2 {
   border: none;
   font-weight: bold;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  transition: background 0.3s, transform 0.2s;
+  transition: background 0.3s;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -69,7 +69,6 @@ h2 {
 
 .btn-add:hover {
   background: #16a085;
-  transform: translateY(-2px);
 }
 
 table {

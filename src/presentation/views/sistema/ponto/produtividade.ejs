@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatório de Produtividade</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/comparacao/comparacao.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="page-head">
+      <div>
+        <h1>Relatório de Produtividade</h1>
+        <p class="subtitle"><%= mesFormatado %></p>
+      </div>
+      <div class="head-actions">
+        <button onclick="window.print()" class="btn btn--primary">
+          <i class="fas fa-print"></i> Imprimir
+        </button>
+        <a href="/ponto" class="btn btn--ghost">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+      </div>
+    </header>
+
+    <!-- Filtro de Mês -->
+    <section class="panel">
+      <div class="panel-body">
+        <form method="GET" action="/ponto/produtividade" class="form-row">
+          <div class="form-group" style="flex: 1;">
+            <label for="mes">Selecionar Mês</label>
+            <input type="month" id="mes" name="mes" value="<%= mes %>" onchange="this.form.submit()" />
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Resumo Geral -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Resumo por Funcionário</h2>
+      </div>
+      <div class="panel-body">
+        <% if (funcionarios && funcionarios.length > 0) { %>
+          <table>
+            <thead>
+              <tr>
+                <th>Funcionário</th>
+                <th>Cargo</th>
+                <th class="text-center">Dias Trabalhados</th>
+                <th class="text-center">Faltas</th>
+                <th class="text-center">Atrasos (min)</th>
+                <th class="text-center">Horas Trabalhadas</th>
+                <th class="text-center">Horas Extras</th>
+                <th class="text-center">Adicional Noturno</th>
+                <th class="text-center">Banco de Horas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% funcionarios.forEach(func => { %>
+                <tr>
+                  <td><strong><%= func.funcionario_nome %></strong></td>
+                  <td><%= func.cargo %></td>
+                  <td class="text-center"><%= func.dias_trabalhados || 0 %></td>
+                  <td class="text-center">
+                    <% if (func.total_faltas > 0) { %>
+                      <span class="badge badge--danger"><%= func.total_faltas %></span>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (func.total_minutos_atraso > 0) { %>
+                      <span style="color: #e74c3c;">
+                        <%= func.total_minutos_atraso %> min
+                        <% if (func.media_atraso > 0) { %>
+                          <br><small>(Média: <%= func.media_atraso %>min)</small>
+                        <% } %>
+                      </span>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <strong><%= Number(func.total_horas || 0).toFixed(2) %>h</strong>
+                  </td>
+                  <td class="text-center">
+                    <% if (func.total_horas_extras > 0) { %>
+                      <strong style="color: #f39c12;">+<%= Number(func.total_horas_extras).toFixed(2) %>h</strong>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if (func.total_adicional_noturno > 0) { %>
+                      <strong style="color: #9b59b6;"><%= Number(func.total_adicional_noturno).toFixed(2) %>h</strong>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% const saldo = Number(func.banco_horas_saldo || 0); %>
+                    <% if (saldo > 0) { %>
+                      <strong style="color: #27ae60;">+<%= saldo.toFixed(2) %>h</strong>
+                    <% } else if (saldo < 0) { %>
+                      <strong style="color: #e74c3c;"><%= saldo.toFixed(2) %>h</strong>
+                    <% } else { %>
+                      <span class="text-muted">0h</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h3>Nenhum dado encontrado</h3>
+            <p>Não há registros de ponto para este mês</p>
+          </div>
+        <% } %>
+      </div>
+    </section>
+  <style>
+    @media print {
+      .btn, .head-actions, form {
+        display: none !important;
+      }
+      
+      body {
+        background: white;
+      }
+      
+      .container {
+        max-width: 100%;
+        padding: 20px;
+      }
+
+      .panel {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</body>
+</html>
