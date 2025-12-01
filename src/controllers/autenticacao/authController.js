@@ -5,7 +5,7 @@ module.exports = {
   register: async (req, res) => {
     const { nome, email, senha } = req.body;
     await User.createUser(nome, email, senha);
-    res.redirect('/login');
+    res.redirect('/auth/login');
   },
   login: async (req, res) => {
     const { email, senha } = req.body;

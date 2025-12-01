@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página não encontrada</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      text-align: center;
+      padding: 50px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+      color: #e74c3c;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 0 10px;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background-color: #2980b9;
+    }
+    .btn-logout {
+      background-color: #e74c3c;
+    }
+    .btn-logout:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>404</h1>
+    <h2>Página não encontrada</h2>
+    <p>Desculpe, a página que você está procurando não existe ou foi movida.</p>
+    <a href="/" class="btn">Voltar ao Início</a>
+    <a href="/dashboard" class="btn">Ir ao Dashboard</a>
+    <form action="/logout" method="POST" style="display: inline;">
+      <button type="submit" class="btn btn-logout">Sair</button>
+    </form>
+  </div>
+</body>
+</html>
