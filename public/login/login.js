@@ -8,14 +8,14 @@
   function moverParaCadastro() {
     if (!container) return;
     container.classList.add('cadastro');
-    if (tituloPainel) tituloPainel.textContent = 'Cadastro';
-    if (textoPainel) textoPainel.textContent = 'Crie sua conta e comece a usar agora!';
+    if (tituloPainel) tituloPainel.textContent = 'GestãoÁgil';
+    if (textoPainel) textoPainel.textContent = 'Comece a organizar seu negócio hoje';
   }
   function moverParaLogin() {
     if (!container) return;
     container.classList.remove('cadastro');
-    if (tituloPainel) tituloPainel.textContent = 'Login';
-    if (textoPainel) textoPainel.textContent = 'Bem-vindo de volta!';
+    if (tituloPainel) tituloPainel.textContent = 'GestãoÁgil';
+    if (textoPainel) textoPainel.textContent = 'Organize seu negócio com simplicidade';
   }
 
   if (linkCadastro) linkCadastro.addEventListener('click', (e) => { e.preventDefault(); moverParaCadastro(); });

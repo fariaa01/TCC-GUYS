@@ -151,7 +151,7 @@ body {
 
 /* Container principal mais compacto */
 .containter {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 1.5rem auto;
   padding: 1.5rem;
   background: var(--bg-card);
@@ -370,35 +370,37 @@ fieldset legend {
 /* Tabelas modernas */
 table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
   margin-top: 2rem;
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
+  background: white;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-th, td {
-  padding: 0.8rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border-light);
+thead {
+  background: #ECF0F1;
 }
 
 th {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 15px;
+  text-align: left;
   font-weight: 600;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  letter-spacing: 0.025em;
+  font-size: 13px;
+  color: #2c3e50;
   text-transform: uppercase;
-  border-bottom: 2px solid var(--border);
+  letter-spacing: 0.5px;
 }
 
 td {
-  color: var(--text-primary);
-  font-size: 0.875rem;
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #ECF0F1;
+  font-size: 14px;
+}
+
+tbody tr:hover {
+  background: rgba(26, 188, 156, 0.05);
 }
 
 tbody tr {

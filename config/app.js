@@ -53,8 +53,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/landing', require('../src/infrastructure/routes/sistema/landing'));
 app.use('/tour', require('../src/infrastructure/routes/sistema/tour'));
+app.use('/', require('../src/infrastructure/routes/sistema/landing'));
 app.use('/', require('../src/infrastructure/routes/usuarios/auth'));
 app.use('/cardapio', require('../src/infrastructure/routes/vendas/cardapio'));
 app.use('/menu', require('../src/infrastructure/routes/vendas/menu'));
