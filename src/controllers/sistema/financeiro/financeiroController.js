@@ -1,5 +1,6 @@
 const Financeiro = require('../../../models/sistema/financeiro/financeiroModel');
 const GastosFixos = require('../../../models/sistema/financeiro/gastos-fixosModel');
+const MetaFinanceira = require('../../../models/sistema/MetaFinanceira');
 
 function pegarPeriodo(req) {
   const agora = new Date();
@@ -98,6 +99,10 @@ module.exports = {
 
       const saldoComFixosMes = saldoFinalMes - totalFixosMes;
 
+      // Buscar ou criar meta do mês atual
+      const metaMes = await MetaFinanceira.buscarOuCriarMetaMesAtual(userId);
+      const progressoMeta = await MetaFinanceira.calcularProgresso(userId, mesEscolhido, anoEscolhido);
+
       // Paginação para gastos fixos
       const pageFixos = parseInt(req.query.pageFixos) || 1;
       const limitFixos = parseInt(req.query.limitFixos) || 10;
@@ -117,6 +122,8 @@ module.exports = {
         saldoComFixos: saldoComFixosMes.toFixed(2),
         ano: anoEscolhido,
         mes: mesEscolhido,
+        metaMes: metaMes,
+        progressoMeta: progressoMeta,
         paginacaoFixos: {
           currentPage: pageFixos,
           totalPages: totalPaginasFixos,
@@ -187,6 +194,26 @@ module.exports = {
     } catch (err) {
       console.error('Erro ao deletar lançamento:', err);
       return res.status(500).send('Erro ao deletar lançamento.');
+    }
+  },
+
+  atualizarMeta: async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ success: false, message: 'Não autorizado' });
+
+      const { meta_id, meta_receita, meta_despesa, meta_economia } = req.body;
+
+      await MetaFinanceira.atualizarMeta(meta_id, {
+        meta_receita: parseFloat(meta_receita) || 0,
+        meta_despesa: parseFloat(meta_despesa) || 0,
+        meta_economia: parseFloat(meta_economia) || 0
+      });
+
+      return res.status(200).json({ success: true, message: 'Meta atualizada com sucesso!' });
+    } catch (err) {
+      console.error('Erro ao atualizar meta:', err);
+      return res.status(500).json({ success: false, message: 'Erro ao atualizar meta.' });
     }
   }
 };

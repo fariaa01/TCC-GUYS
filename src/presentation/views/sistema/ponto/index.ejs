@@ -491,6 +491,29 @@
     if (msg) Swal.fire('Sucesso!', msg, 'success');
     if (erro) Swal.fire('Erro!', erro, 'error');
 
+    // Converter horas decimais para formato legível (ex: 1.98 -> 1h 59min)
+    function formatarHoras(horasDecimais) {
+      if (!horasDecimais || horasDecimais == 0) return '0h 0min';
+      const horas = Math.floor(horasDecimais);
+      const minutos = Math.round((horasDecimais - horas) * 60);
+      if (horas === 0) return `${minutos}min`;
+      if (minutos === 0) return `${horas}h`;
+      return `${horas}h ${minutos}min`;
+    }
+
+    // Formatar todas as horas na página
+    document.addEventListener('DOMContentLoaded', function() {
+      // Formatar horas trabalhadas e extras nas células da tabela
+      document.querySelectorAll('td strong').forEach(el => {
+        const texto = el.textContent.trim();
+        if (texto.match(/^[\d.]+h$/) || texto.match(/^\+[\d.]+h$/)) {
+          const valor = parseFloat(texto.replace(/[+h]/g, ''));
+          const prefixo = texto.startsWith('+') ? '+' : '';
+          el.textContent = prefixo + formatarHoras(valor);
+        }
+      });
+    });
+
     // Atualizar hora atual no modal
     function atualizarHoraAtual() {
       const agora = new Date();
@@ -522,6 +545,35 @@
 
     function fecharModalRegistroManual() {
       document.getElementById('modalRegistroManual').style.display = 'none';
+    }
+
+    // Preencher horários automaticamente quando selecionar funcionário
+    const selectFuncionario = document.getElementById('manual_funcionario_id');
+    const inputHoraEntrada = document.getElementById('manual_hora_entrada');
+    const inputHoraSaida = document.getElementById('manual_hora_saida');
+
+    if (selectFuncionario) {
+      selectFuncionario.addEventListener('change', async function() {
+        const funcionarioId = this.value;
+        
+        if (!funcionarioId) {
+          inputHoraEntrada.value = '';
+          inputHoraSaida.value = '';
+          return;
+        }
+
+        try {
+          const response = await fetch(`/ponto/horario-padrao/${funcionarioId}`);
+          const data = await response.json();
+
+          if (data.sucesso) {
+            if (data.hora_entrada) inputHoraEntrada.value = data.hora_entrada;
+            if (data.hora_saida) inputHoraSaida.value = data.hora_saida;
+          }
+        } catch (error) {
+          console.error('Erro ao buscar horário padrão:', error);
+        }
+      });
     }
 
     // Modal Falta

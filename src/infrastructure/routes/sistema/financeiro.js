@@ -8,4 +8,6 @@ router.post('/create', controller.criar);
 router.post('/update/:id', controller.atualizar);
 router.post('/delete/:id', controller.deletar);
 
+router.post('/metas/atualizar', controller.atualizarMeta);
+
 module.exports = router;

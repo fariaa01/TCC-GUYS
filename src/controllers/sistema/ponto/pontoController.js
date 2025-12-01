@@ -321,6 +321,57 @@ exports.relatorioProdutividade = async (req, res) => {
   }
 };
 
+// Buscar horário padrão do funcionário
+exports.buscarHorarioPadrao = async (req, res) => {
+  try {
+    const usuarioId = req.session.userId;
+    if (!usuarioId) return res.status(401).json({ sucesso: false, mensagem: 'Não autorizado' });
+
+    const funcionario_id = req.params.funcionario_id;
+
+    // Buscar jornada configurada
+    const [jornadas] = await db.query(
+      'SELECT inicio_expediente, fim_expediente FROM jornada_trabalho WHERE funcionario_id = ? AND usuario_id = ? AND ativo = 1',
+      [funcionario_id, usuarioId]
+    );
+
+    if (jornadas.length > 0) {
+      return res.json({
+        sucesso: true,
+        hora_entrada: jornadas[0].inicio_expediente ? jornadas[0].inicio_expediente.substring(0, 5) : null,
+        hora_saida: jornadas[0].fim_expediente ? jornadas[0].fim_expediente.substring(0, 5) : null
+      });
+    }
+
+    // Se não tem jornada configurada, buscar o último registro do funcionário
+    const [registros] = await db.query(
+      `SELECT hora_entrada, hora_saida FROM registro_ponto 
+       WHERE funcionario_id = ? AND usuario_id = ? 
+       AND hora_entrada IS NOT NULL AND hora_saida IS NOT NULL
+       ORDER BY data DESC, id DESC LIMIT 1`,
+      [funcionario_id, usuarioId]
+    );
+
+    if (registros.length > 0) {
+      return res.json({
+        sucesso: true,
+        hora_entrada: registros[0].hora_entrada ? registros[0].hora_entrada.substring(0, 5) : null,
+        hora_saida: registros[0].hora_saida ? registros[0].hora_saida.substring(0, 5) : null
+      });
+    }
+
+    // Se não encontrou nada, retornar horários padrão
+    res.json({
+      sucesso: true,
+      hora_entrada: '08:00',
+      hora_saida: '17:00'
+    });
+  } catch (error) {
+    console.error('Erro ao buscar horário padrão:', error);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro ao buscar horário padrão' });
+  }
+};
+
 // Relatório mensal
 exports.relatorioMensal = async (req, res) => {
   try {

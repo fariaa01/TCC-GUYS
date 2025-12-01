@@ -59,6 +59,92 @@
       </div>
     </section>
 
+    <!-- Seção de Metas Financeiras -->
+    <% if (progressoMeta) { %>
+    <section class="metas-section">
+      <div class="metas-header">
+        <h2><i class="fas fa-bullseye"></i> Metas do Mês</h2>
+        <button class="btn btn--secondary btn-sm" id="btnEditarMetas">
+          <i class="fas fa-edit"></i> Editar Metas
+        </button>
+      </div>
+      
+      <div class="metas-grid">
+        <!-- Meta de Receita -->
+        <div class="meta-card <%= progressoMeta.alertas.receita_atingida ? 'atingida' : '' %>">
+          <div class="meta-icon receita">
+            <i class="fas fa-arrow-up"></i>
+          </div>
+          <div class="meta-info">
+            <h3>Receita</h3>
+            <div class="meta-valores">
+              <span class="valor-atual">R$ <%= progressoMeta.realizado.receita.toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></span>
+              <span class="valor-meta">/ R$ <%= progressoMeta.meta.meta_receita.toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill receita" style="width: <%= progressoMeta.progresso.receita %>%">
+                <span class="progress-text"><%= progressoMeta.progresso.receita.toFixed(0) %>%</span>
+              </div>
+            </div>
+            <% if (progressoMeta.alertas.receita_atingida) { %>
+              <div class="meta-alerta sucesso">
+                <i class="fas fa-check-circle"></i> Meta atingida!
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Meta de Despesa -->
+        <div class="meta-card <%= progressoMeta.alertas.despesa_ultrapassada ? 'ultrapassada' : '' %>">
+          <div class="meta-icon despesa">
+            <i class="fas fa-arrow-down"></i>
+          </div>
+          <div class="meta-info">
+            <h3>Despesa Máxima</h3>
+            <div class="meta-valores">
+              <span class="valor-atual">R$ <%= progressoMeta.realizado.despesa.toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></span>
+              <span class="valor-meta">/ R$ <%= progressoMeta.meta.meta_despesa.toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill despesa" style="width: <%= progressoMeta.progresso.despesa %>%">
+                <span class="progress-text"><%= progressoMeta.progresso.despesa.toFixed(0) %>%</span>
+              </div>
+            </div>
+            <% if (progressoMeta.alertas.despesa_ultrapassada) { %>
+              <div class="meta-alerta aviso">
+                <i class="fas fa-exclamation-triangle"></i> Meta ultrapassada!
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Meta de Economia -->
+        <div class="meta-card <%= progressoMeta.alertas.economia_atingida ? 'atingida' : '' %>">
+          <div class="meta-icon economia">
+            <i class="fas fa-piggy-bank"></i>
+          </div>
+          <div class="meta-info">
+            <h3>Economia</h3>
+            <div class="meta-valores">
+              <span class="valor-atual">R$ <%= progressoMeta.realizado.economia.toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></span>
+              <span class="valor-meta">/ R$ <%= progressoMeta.meta.meta_economia.toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill economia" style="width: <%= progressoMeta.progresso.economia %>%">
+                <span class="progress-text"><%= progressoMeta.progresso.economia.toFixed(0) %>%</span>
+              </div>
+            </div>
+            <% if (progressoMeta.alertas.economia_atingida) { %>
+              <div class="meta-alerta sucesso">
+                <i class="fas fa-check-circle"></i> Meta atingida!
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </section>
+    <% } %>
+
     <%
       const categoriasUnicas = Array.from(new Set((dados || []).map(d => d?.categoria).filter(Boolean))).sort();
     %>
@@ -300,9 +386,67 @@
     </section>
   </div>
 
+  <!-- Modal de Edição de Metas -->
+  <div id="modalMetas" class="modal">
+    <div class="modal-content">
+      <span class="close" id="fecharModalMetas" aria-label="Fechar">&times;</span>
+      <h3><i class="fas fa-bullseye"></i> Definir Metas do Mês</h3>
+      
+      <form id="formMetas">
+        <input type="hidden" id="meta_id" name="meta_id" value="<%= metaMes ? metaMes.id : '' %>">
+        
+        <div class="form-group">
+          <label for="meta_receita">
+            <i class="fas fa-arrow-up" style="color: #10b981;"></i> Meta de Receita
+          </label>
+          <input type="text" 
+                 id="meta_receita" 
+                 name="meta_receita"
+                 placeholder="Ex: 1.200,00"
+                 value="<%= metaMes ? metaMes.meta_receita : 0 %>"
+                 required />
+          <small>Quanto você espera receber este mês</small>
+        </div>
+
+        <div class="form-group">
+          <label for="meta_despesa">
+            <i class="fas fa-arrow-down" style="color: #ef4444;"></i> Meta de Despesa Máxima
+          </label>
+          <input type="text" 
+                 id="meta_despesa" 
+                 name="meta_despesa"
+                 placeholder="Ex: 1.200,00"
+                 value="<%= metaMes ? metaMes.meta_despesa : 0 %>"
+                 required />
+          <small>Quanto você pode gastar no máximo</small>
+        </div>
+
+        <div class="form-group">
+          <label for="meta_economia">
+            <i class="fas fa-piggy-bank" style="color: #8b5cf6;"></i> Meta de Economia
+          </label>
+          <input type="text" 
+                 id="meta_economia" 
+                 name="meta_economia"
+                 placeholder="Ex: 1.200,00"
+                 value="<%= metaMes ? metaMes.meta_economia : 0 %>"
+                 required />
+          <small>Quanto você quer economizar este mês</small>
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+          <button type="button" class="btn btn--secondary" id="cancelarMetas">Cancelar</button>
+          <button type="submit" class="btn btn--primary">
+            <i class="fas fa-save"></i> Salvar Metas
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="modalLancamento" class="modal">
     <div class="modal-content">
-      <button id="fecharModal" class="close" aria-label="Fechar">&times;</button>
+      <span id="fecharModal" class="close" aria-label="Fechar">&times;</span>
       <h3>Novo Lançamento</h3>
 
       <form method="POST" action="/financeiro/create" id="formLancamento">
@@ -324,8 +468,8 @@
         <input type="date" name="data" required />
 
         <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
-          <button type="button" class="btn-secondary" id="cancelarLancamento">Cancelar</button>
-          <button type="submit" class="btn-primary">Adicionar</button>
+          <button type="button" class="btn btn--secondary" id="cancelarLancamento">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Adicionar</button>
         </div>
       </form>
     </div>
@@ -333,7 +477,7 @@
 
   <div id="modalGastoFixo" class="modal">
     <div class="modal-content">
-      <button id="fecharModalFixo" class="close" aria-label="Fechar">&times;</button>
+      <span id="fecharModalFixo" class="close" aria-label="Fechar">&times;</span>
       <h3>Novo Gasto Fixo</h3>
 
       <form id="formGastoFixo" method="POST" action="/gastos-fixos">
@@ -354,8 +498,8 @@
         <textarea name="observacao" placeholder="Observações (opcional)" rows="3"></textarea>
 
         <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
-          <button type="button" class="btn-secondary" id="cancelarGastoFixo">Cancelar</button>
-          <button type="submit" class="btn-primary">Adicionar</button>
+          <button type="button" class="btn btn--secondary" id="cancelarGastoFixo">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Adicionar</button>
         </div>
       </form>
     </div>

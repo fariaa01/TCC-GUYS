@@ -305,3 +305,153 @@
     });
   };
 
+  // ==================== METAS FINANCEIRAS ====================
+  document.addEventListener('DOMContentLoaded', function() {
+    const modalMetas = document.getElementById('modalMetas');
+    const btnEditarMetas = document.getElementById('btnEditarMetas');
+    const btnFecharMetas = document.getElementById('fecharModalMetas');
+    const btnCancelarMetas = document.getElementById('cancelarMetas');
+    const formMetas = document.getElementById('formMetas');
+
+    // Formatação de valores monetários
+    function formatarMoeda(input) {
+      let valor = input.value.replace(/\D/g, '');
+      if (valor === '') {
+        input.value = '';
+        return;
+      }
+      valor = (parseInt(valor) / 100).toFixed(2);
+      valor = valor.replace('.', ',');
+      valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      input.value = valor;
+    }
+
+    function desformatarMoeda(valorFormatado) {
+      return valorFormatado.replace(/\./g, '').replace(',', '.');
+    }
+
+    // Aplicar formatação aos inputs de meta
+    const inputMetaReceita = document.getElementById('meta_receita');
+    const inputMetaDespesa = document.getElementById('meta_despesa');
+    const inputMetaEconomia = document.getElementById('meta_economia');
+
+    if (inputMetaReceita) {
+      // Formatar valor inicial se existir
+      if (inputMetaReceita.value && parseFloat(inputMetaReceita.value) > 0) {
+        const valorInicial = (parseFloat(inputMetaReceita.value) * 100).toString();
+        inputMetaReceita.value = valorInicial;
+        formatarMoeda(inputMetaReceita);
+      }
+      inputMetaReceita.addEventListener('input', function() { formatarMoeda(this); });
+    }
+
+    if (inputMetaDespesa) {
+      if (inputMetaDespesa.value && parseFloat(inputMetaDespesa.value) > 0) {
+        const valorInicial = (parseFloat(inputMetaDespesa.value) * 100).toString();
+        inputMetaDespesa.value = valorInicial;
+        formatarMoeda(inputMetaDespesa);
+      }
+      inputMetaDespesa.addEventListener('input', function() { formatarMoeda(this); });
+    }
+
+    if (inputMetaEconomia) {
+      if (inputMetaEconomia.value && parseFloat(inputMetaEconomia.value) > 0) {
+        const valorInicial = (parseFloat(inputMetaEconomia.value) * 100).toString();
+        inputMetaEconomia.value = valorInicial;
+        formatarMoeda(inputMetaEconomia);
+      }
+      inputMetaEconomia.addEventListener('input', function() { formatarMoeda(this); });
+    }
+
+    function abrirModalMetas() {
+      if (modalMetas) {
+        modalMetas.classList.add('is-open');
+      }
+    }
+
+    function fecharModalMetas() {
+      if (modalMetas) {
+        modalMetas.classList.remove('is-open');
+      }
+    }
+
+    if (btnEditarMetas) {
+      btnEditarMetas.addEventListener('click', abrirModalMetas);
+    }
+
+    if (btnFecharMetas) {
+      btnFecharMetas.addEventListener('click', fecharModalMetas);
+    }
+
+    if (btnCancelarMetas) {
+      btnCancelarMetas.addEventListener('click', fecharModalMetas);
+    }
+
+    if (modalMetas) {
+      window.addEventListener('click', function(e) {
+        if (e.target === modalMetas) {
+          fecharModalMetas();
+        }
+      });
+    }
+
+    if (formMetas) {
+      formMetas.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const metaId = document.getElementById('meta_id').value;
+        const metaReceita = desformatarMoeda(document.getElementById('meta_receita').value);
+        const metaDespesa = desformatarMoeda(document.getElementById('meta_despesa').value);
+        const metaEconomia = desformatarMoeda(document.getElementById('meta_economia').value);
+
+        fetch('/financeiro/metas/atualizar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            meta_id: metaId,
+            meta_receita: metaReceita,
+            meta_despesa: metaDespesa,
+            meta_economia: metaEconomia
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Metas atualizadas!',
+              text: data.message,
+              confirmButtonText: 'OK',
+              buttonsStyling: false,
+              customClass: { confirmButton: 'btn btn--primary' }
+            }).then(() => {
+              location.reload();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Erro!',
+              text: data.message,
+              confirmButtonText: 'OK',
+              buttonsStyling: false,
+              customClass: { confirmButton: 'btn btn--danger' }
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Erro:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Erro!',
+            text: 'Não foi possível atualizar as metas.',
+            confirmButtonText: 'OK',
+            buttonsStyling: false,
+            customClass: { confirmButton: 'btn btn--danger' }
+          });
+        });
+      });
+    }
+  });
+

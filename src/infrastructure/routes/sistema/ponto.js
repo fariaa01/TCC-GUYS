@@ -27,6 +27,9 @@ router.post('/registrar-falta', ensureAuth, pontoController.registrarFalta);
 // Editar ponto
 router.put('/editar', ensureAuth, pontoController.editar);
 
+// Buscar horário padrão do funcionário
+router.get('/horario-padrao/:funcionario_id', ensureAuth, pontoController.buscarHorarioPadrao);
+
 // Relatório de produtividade
 router.get('/produtividade', ensureAuth, pontoController.relatorioProdutividade);
 

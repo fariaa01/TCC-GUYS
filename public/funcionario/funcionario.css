@@ -97,6 +97,7 @@ th {
 }
 
 td {
+  padding: 15px;
   border-bottom: 1px solid #ECF0F1;
   font-size: 14px;
 }

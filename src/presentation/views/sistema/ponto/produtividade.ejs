@@ -142,5 +142,30 @@
       }
     }
   </style>
+
+  <script nonce="<%= cspNonce %>">
+    // Converter horas decimais para formato legível (ex: 1.98 -> 1h 59min)
+    function formatarHoras(horasDecimais) {
+      if (!horasDecimais || horasDecimais == 0) return '0h 0min';
+      const horas = Math.floor(Math.abs(horasDecimais));
+      const minutos = Math.round((Math.abs(horasDecimais) - horas) * 60);
+      const sinal = horasDecimais < 0 ? '-' : '';
+      if (horas === 0) return `${sinal}${minutos}min`;
+      if (minutos === 0) return `${sinal}${horas}h`;
+      return `${sinal}${horas}h ${minutos}min`;
+    }
+
+    // Formatar todas as horas na página
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('td strong').forEach(el => {
+        const texto = el.textContent.trim();
+        if (texto.match(/^[+-]?[\d.]+h$/) || texto.match(/^\+[\d.]+h$/)) {
+          const valor = parseFloat(texto.replace(/[+h]/g, ''));
+          const prefixo = texto.startsWith('+') ? '+' : '';
+          el.textContent = prefixo + formatarHoras(valor);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
